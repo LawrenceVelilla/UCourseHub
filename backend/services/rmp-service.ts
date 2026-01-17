@@ -1,14 +1,22 @@
+/*
+* This file is responsible for scraping professor data from RateMyProfessor.
+* Will be expanded later to handle saving to prof table, and also for decoding base64 school and department IDs (could be in util as well).
+*/
+import { pool } from "../config/db/index";
+import { randomUUID } from "crypto";
+
+
 interface Professor {
     id: string;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     department: string;
-    rmpId: number;
-    wouldTakeAgainPercentage: number;
-    numRatings: number;
-    avgRating: number;
-    avgDifficulty: number;
-    createdAt: string;
+    rmp_id: number;
+    would_take_again: number;
+    num_ratings: number;
+    avg_rating: number;
+    difficulty: number;
+    created_at: string;
 }
 
 interface QueryObject {
@@ -115,10 +123,10 @@ async function executeGraphQLQuery(payload: string): Promise<any> {
     });
 
     if (response.status != 200) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
 
     // Check for GraphQL errors
     if (data.errors) {
@@ -189,13 +197,63 @@ function parseProfessor(node: any, filterDepartment: string): Professor {
         const createdAt: string = new Date().toISOString();
 
         const professor: Professor = {
-            rmpId, firstName, lastName, department, avgRating, avgDifficulty, numRatings, wouldTakeAgainPercentage, id,
-            createdAt
+            rmp_id: rmpId, first_name: firstName, last_name: lastName, department: department, avg_rating: avgRating, difficulty: avgDifficulty, num_ratings: numRatings, would_take_again: wouldTakeAgainPercentage, id: id,
+            created_at: createdAt
         }
         console.log(JSON.stringify(professor, null, 2));
         return professor;
     } catch (error) {
         console.error("Error parsing professor:", error);
+        throw error;
+    }
+}
+
+export async function bulkSaveProfessors(professors: Professor[]) {
+    if (professors.length === 0) return 0;
+
+    const query = `
+        INSERT INTO professors (
+            name, department, rmp_id,
+            would_take_again, num_ratings, avg_rating,
+            difficulty, id
+        )
+        SELECT * FROM UNNEST (
+            $1::text[], $2::text[], $3::int[],
+            $4::float[], $5::int[], $6::float[],
+            $7::float[], $8::text[]
+        )
+        ON CONFLICT (rmp_id) DO UPDATE SET
+            name = EXCLUDED.name,
+            department = EXCLUDED.department,
+            would_take_again = EXCLUDED.would_take_again,
+            num_ratings = EXCLUDED.num_ratings,
+            avg_rating = EXCLUDED.avg_rating,
+            difficulty = EXCLUDED.difficulty,
+            id = EXCLUDED.id;
+    `;
+
+    // const firstNames = professors.map(p => p.first_name);
+    // const lastNames = professors.map(p => p.last_name);
+    const name = professors.map(p => `${p.first_name} ${p.last_name}`);
+    const departments = professors.map(p => p.department);
+    const rmpIds = professors.map(p => p.rmp_id);
+    const wouldTakeAgain = professors.map(p => p.would_take_again);
+    const numRatings = professors.map(p => p.num_ratings);
+    const avgRatings = professors.map(p => p.avg_rating);
+    const difficulty = professors.map(p => p.difficulty);
+    const ids = professors.map(p => p.id);
+
+
+    try {
+        await pool.query(query, [
+            name, departments, rmpIds,
+            wouldTakeAgain, numRatings, avgRatings,
+            difficulty, ids
+        ]);
+        console.log(`Saved ${professors.length} professors to database`);
+        return professors.length;
+    } catch (error) {
+        console.error("Error bulk saving professors:", error);
         throw error;
     }
 }

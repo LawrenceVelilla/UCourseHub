@@ -1,0 +1,27 @@
+{
+  "name": "ucoursehub-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "server": "tsx server.ts",
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1",
+    "neon": "^2.0.0",
+    "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^24.10.9",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3"
+  }
+}
