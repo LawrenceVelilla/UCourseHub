@@ -76,7 +76,25 @@ export async function filterByDepartment(department: string) {
 }
 
 // Get the urls of professor only if they have a rating/page in rate my professor
-export async function getRatedProfessors(professors: string[]) {
+export async function getProfessors(pageSource: string) {
+    const $ = cheerio.load(pageSource);
+    const professors: any[] = [];
+
+    // Prof name and url in a tbody --> a, with href to their page, and class=stretched-link
+    // prof role is in a title inside a the first td
+    $('tbody tr').each((_, element) => {
+        const $professor = $(element);
+        const name = $professor.find('td').first().find('a').text().trim();
+        const url = $professor.find('td').first().find('a').attr('href');
+        const role = $professor.find('td').eq(1).text().trim();
+        professors.push({ name, url, role });
+    });
+
+    console.log("first ten professors:", professors.slice(0, 10));
+    return professors;
+}
+
+export async function scrapeProfessorPage(url: string) {
 
 }
 

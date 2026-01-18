@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { filterByDepartment } from "../scrapers/prof-catalogue";
+import { filterByDepartment, getProfessors } from "../scrapers/prof-catalogue";
 import { scrapeAndSaveDepartmentCourses } from "../services/course-service";
 
 const router = Router();
@@ -12,8 +12,9 @@ router.get("/prof-scraper", async (req, res) => {
     }
 
     try {
-        await filterByDepartment(department);
-        res.json({ message: "Success", department });
+        const pageSource = await filterByDepartment(department);
+        const professors = await getProfessors(pageSource);
+        res.json({ message: "Success", department, professors });
     } catch (error) {
         console.error("Error scraping professors:", error);
         res.status(500).json({ error: "Failed to scrape professors" });
