@@ -21,8 +21,8 @@ export const courses = pgTable('courses', {
     keywords: jsonb('keywords'),
     description: text('description'),
     units: jsonb('units'),
-    searchVector: tsvector('searchVector'),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    search_vector: tsvector('search_vector'),
+    updatedAt: timestamp('updatedAt').defaultNow(),
 }, (table) => ({
     // Unique constraint: one course code per department
     departmentCourseCodeUnique: uniqueIndex('courses_department_courseCode_key')
@@ -33,7 +33,7 @@ export const courses = pgTable('courses', {
     prereqsIdx: index('idx_courses_prereqs').using('gin', table.flattenedPrerequisites),
     coreqsIdx: index('idx_courses_coreqs').using('gin', table.flattenedCorequisites),
     // Full-text search index
-    searchVectorIdx: index('idx_courses_search_vector').using('gin', table.searchVector),
+    searchVectorIdx: index('idx_courses_search_vector').using('gin', table.search_vector),
 }));
 
 

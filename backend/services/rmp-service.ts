@@ -2,8 +2,9 @@
 * This file is responsible for scraping professor data from RateMyProfessor.
 * Will be expanded later to handle saving to prof table, and also for decoding base64 school and department IDs (could be in util as well).
 */
-import { pool } from "../config/db/index";
-import { randomUUID } from "crypto";
+import { db } from "../config/db/index";
+import { professors } from "../config/db/professors";
+import { sql } from "drizzle-orm";
 
 
 interface Professor {
@@ -192,7 +193,7 @@ function parseProfessor(node: any, filterDepartment: string): Professor {
         const avgRating: number = node.avgRating;
         const avgDifficulty: number = node.avgDifficulty;
         const numRatings: number = node.numRatings;
-        const wouldTakeAgainPercentage: number = node.wouldTakeAgainPercent.toFixed(2);
+        const wouldTakeAgainPercentage: number = Math.round(node.wouldTakeAgainPercent || 0);
         const id: string = node.id;
         const createdAt: string = new Date().toISOString();
 
@@ -208,50 +209,38 @@ function parseProfessor(node: any, filterDepartment: string): Professor {
     }
 }
 
-export async function bulkSaveProfessors(professors: Professor[]) {
-    if (professors.length === 0) return 0;
+export async function bulkSaveProfessors(professorList: Professor[]) {
+    if (professorList.length === 0) return 0;
 
-    const query = `
-        INSERT INTO professors (
-            name, department, rmp_id,
-            would_take_again, num_ratings, avg_rating,
-            difficulty, id
-        )
-        SELECT * FROM UNNEST (
-            $1::text[], $2::text[], $3::int[],
-            $4::float[], $5::int[], $6::float[],
-            $7::float[], $8::text[]
-        )
-        ON CONFLICT (rmp_id) DO UPDATE SET
-            name = EXCLUDED.name,
-            department = EXCLUDED.department,
-            would_take_again = EXCLUDED.would_take_again,
-            num_ratings = EXCLUDED.num_ratings,
-            avg_rating = EXCLUDED.avg_rating,
-            difficulty = EXCLUDED.difficulty,
-            id = EXCLUDED.id;
-    `;
-
-    // const firstNames = professors.map(p => p.first_name);
-    // const lastNames = professors.map(p => p.last_name);
-    const name = professors.map(p => `${p.first_name} ${p.last_name}`);
-    const departments = professors.map(p => p.department);
-    const rmpIds = professors.map(p => p.rmp_id);
-    const wouldTakeAgain = professors.map(p => p.would_take_again);
-    const numRatings = professors.map(p => p.num_ratings);
-    const avgRatings = professors.map(p => p.avg_rating);
-    const difficulty = professors.map(p => p.difficulty);
-    const ids = professors.map(p => p.id);
-
+    const values = professorList.map(p => ({
+        id: p.id,
+        name: `${p.first_name} ${p.last_name}`,
+        department: p.department,
+        rmp_id: String(p.rmp_id),
+        would_take_again: p.would_take_again,
+        num_ratings: p.num_ratings,
+        avg_rating: String(p.avg_rating),
+        difficulty: String(p.difficulty),
+    }));
 
     try {
-        await pool.query(query, [
-            name, departments, rmpIds,
-            wouldTakeAgain, numRatings, avgRatings,
-            difficulty, ids
-        ]);
-        console.log(`Saved ${professors.length} professors to database`);
-        return professors.length;
+        await db.insert(professors)
+            .values(values)
+            .onConflictDoUpdate({
+                target: professors.rmp_id,
+                set: {
+                    name: sql`EXCLUDED.name`,
+                    department: sql`EXCLUDED.department`,
+                    would_take_again: sql`EXCLUDED.would_take_again`,
+                    num_ratings: sql`EXCLUDED.num_ratings`,
+                    avg_rating: sql`EXCLUDED.avg_rating`,
+                    difficulty: sql`EXCLUDED.difficulty`,
+                    updatedAt: new Date(),
+                },
+            });
+
+        console.log(`Saved ${professorList.length} professors to database`);
+        return professorList.length;
     } catch (error) {
         console.error("Error bulk saving professors:", error);
         throw error;

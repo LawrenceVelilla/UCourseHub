@@ -11,19 +11,24 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "axios": "^1.13.2",
+    "cheerio": "^1.1.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
     "morgan": "^1.10.1",
     "neon": "^2.0.0",
-    "pg": "^8.17.1"
+    "openai": "^6.16.0",
+    "pg": "^8.17.1",
+    "selenium-webdriver": "^4.39.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^24.10.9",
     "@types/pg": "^8.16.0",
-    "drizzle-kit": "^0.18.1",
+    "@types/selenium-webdriver": "^4.35.5",
+    "drizzle-kit": "^0.31.8",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3"
   }

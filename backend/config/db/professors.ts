@@ -13,8 +13,6 @@ export const professors = pgTable('professors', {
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
-    // Unique constraint: one professor name per department
-    // Note: could cause issues if two professors share the same name
     nameDepartmentUnique: uniqueIndex('professors_name_department_key')
         .on(table.name, table.department),
 }));
