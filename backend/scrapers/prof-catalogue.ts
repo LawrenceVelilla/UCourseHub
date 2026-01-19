@@ -1,7 +1,7 @@
 // This file is for professor catalogue scraping
 // Use selenium to navigate to the right page by pressing the right filters
-// Then scrape the professors with the links to their pages
-// Then get the courses they are teaching with their corresponding page links
+// Then scrape the professors with the links to their pages using cheerio
+// Then get the courses they are teaching with their corresponding page links using cheerio
 import { Builder, Browser, By, Key, until } from 'selenium-webdriver';
 import chrome from "selenium-webdriver/chrome";
 import * as cheerio from "cheerio";
@@ -154,22 +154,15 @@ export async function getProfessorInfo(url: string) {
 }
 
 export async function fetchProfessors(department: string): Promise<any> {
-    console.log(`Starting scrape for department: ${department}`);
 
-    // 1. Get the main page source for the department
     const pageSource = await filterByDepartment(department);
-
-    // 2. Parse the list of professors
     const basicProfs = await getProfessors(pageSource);
-    console.log(`Found ${basicProfs.length} professors. Fetching detailed info...`);
 
     const detailedProfs = [];
     const BATCH_SIZE = 5;
 
-    // 3. Fetch details for each professor in batches
     for (let i = 0; i < basicProfs.length; i += BATCH_SIZE) {
         const batch = basicProfs.slice(i, i + BATCH_SIZE);
-        console.log(`Processing batch ${i / BATCH_SIZE + 1} of ${Math.ceil(basicProfs.length / BATCH_SIZE)}`);
 
         const batchResults = await Promise.all(
             batch.map(async (prof) => {
@@ -184,7 +177,6 @@ export async function fetchProfessors(department: string): Promise<any> {
                     return fullInfo;
                 } catch (error) {
                     console.error(`Failed to fetch details for ${prof.name}:`, error);
-                    // Return the professor object as is as a fallback
                     return prof;
                 }
             })

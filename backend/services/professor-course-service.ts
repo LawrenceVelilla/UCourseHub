@@ -1,13 +1,3 @@
-/**
- * Professor-Course Service
- *
- * Handles matching professors from UAlberta directory to:
- * 1. Existing professors in the database (from RMP)
- * 2. Courses in the database (by course code)
- *
- * Creates entries in professor_courses junction table
- */
-
 import { db } from "../config/db/index";
 import { professors } from "../config/db/professors";
 import { courses } from "../config/db/courses";
@@ -20,47 +10,10 @@ import {
     firstNamesMatch,
     extractCourseCode
 } from "../utils/professor-utils";
+import { ProfCourse, ScrapedProfessor, MatchResult, LinkResult, SyncSummary } from "./types";
 
-// Types from the prof-catalogue scraper
-interface ProfCourse {
-    course: string;
-    courseUrl: string;
-    term?: string;
-    year?: string;
-}
 
-interface ScrapedProfessor {
-    name: string;
-    url: string;
-    role: string;
-    courses: ProfCourse[];
-}
 
-interface MatchResult {
-    professorId: string;
-    isNewProfessor: boolean;
-    professorName: string;
-}
-
-interface LinkResult {
-    linked: number;
-    failed: number;
-    details: { courseCode: string; success: boolean; reason?: string }[];
-}
-
-interface SyncSummary {
-    totalScraped: number;
-    matched: number;
-    newProfessors: number;
-    coursesLinked: number;
-    coursesFailed: number;
-    errors: string[];
-}
-
-/**
- * Tries to match a scraped professor to an existing professor in the database
- * Uses smart matching that handles middle names and first name variations
- */
 export async function findMatchingProfessor(scrapedName: string, department: string): Promise<{ id: string; name: string } | null> {
     const { firstName, lastName } = parseNameParts(scrapedName);
 
@@ -110,9 +63,6 @@ export async function findMatchingProfessor(scrapedName: string, department: str
     return null;
 }
 
-/**
- * Finds a course in the database by course code
- */
 export async function findCourseByCode(courseCode: string): Promise<{ id: string; courseCode: string } | null> {
     const result = await db
         .select({ id: courses.id, courseCode: courses.courseCode })
@@ -123,10 +73,6 @@ export async function findCourseByCode(courseCode: string): Promise<{ id: string
     return result.length > 0 ? { id: result[0].id, courseCode: result[0].courseCode } : null;
 }
 
-/**
- * Saves a professor-course relationship
- * Uses upsert to handle duplicates
- */
 export async function saveProfessorCourse(professorId: string, courseId: string, term: string, year: number): Promise<void> {
     await db.insert(professorCourses)
         .values({
@@ -138,9 +84,6 @@ export async function saveProfessorCourse(professorId: string, courseId: string,
         .onConflictDoNothing();
 }
 
-/**
- * Links a professor to all their courses
- */
 export async function linkProfessorToCourses(professorId: string, scrapedCourses: ProfCourse[]): Promise<LinkResult> {
     const result: LinkResult = {
         linked: 0,
@@ -173,7 +116,6 @@ export async function linkProfessorToCourses(professorId: string, scrapedCourses
             continue;
         }
 
-        // Parse term and year
         const term = course.term || 'Unknown';
         const year = course.year ? parseInt(course.year, 10) : new Date().getFullYear();
 
@@ -197,15 +139,7 @@ export async function linkProfessorToCourses(professorId: string, scrapedCourses
     return result;
 }
 
-/**
- * Creates a new professor entry for professors not found in RMP
- * Sets RMP fields to null
- * If a professor with the same name/department exists, returns the existing ID
- */
-export async function createProfessorWithoutRMP(
-    name: string,
-    department: string
-): Promise<string> {
+export async function createProfessorWithoutRMP(name: string, department: string): Promise<string> {
     const existing = await db
         .select({ id: professors.id })
         .from(professors)
@@ -221,7 +155,6 @@ export async function createProfessorWithoutRMP(
         return existing[0].id;
     }
 
-    // Create new professor
     const id = uuidv4();
 
     await db.insert(professors)
@@ -239,15 +172,7 @@ export async function createProfessorWithoutRMP(
     return id;
 }
 
-/**
- * Processes a single scraped professor:
- * 1. Finds or creates the professor in the database
- * 2. Links them to their courses
- */
-export async function processProfessor(
-    scrapedProf: ScrapedProfessor,
-    department: string
-): Promise<{ matchResult: MatchResult; linkResult: LinkResult }> {
+export async function processProfessor(scrapedProf: ScrapedProfessor, department: string): Promise<{ matchResult: MatchResult; linkResult: LinkResult }> {
     const existingProf = await findMatchingProfessor(scrapedProf.name, department);
 
     let matchResult: MatchResult;
@@ -275,9 +200,6 @@ export async function processProfessor(
     return { matchResult, linkResult };
 }
 
-/**
- * Main sync function: processes all scraped professors for a department
- */
 export async function syncProfessorsToCourses(scrapedProfessors: ScrapedProfessor[], ualbertaDepartment: string): Promise<SyncSummary> {
     const dbDepartment = normalizeDepartment(ualbertaDepartment);
     console.log(`Department mapping: "${ualbertaDepartment}" → "${dbDepartment}"`);
@@ -313,18 +235,7 @@ export async function syncProfessorsToCourses(scrapedProfessors: ScrapedProfesso
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Unknown error';
             summary.errors.push(`Failed to process ${prof.name}: ${errorMsg}`);
-            console.error(`Error processing professor ${prof.name}:`, error);
         }
-    }
-
-    console.log(`\nSync Summary for ${ualbertaDepartment} (DB: ${dbDepartment})`);
-    console.log(`Total scraped: ${summary.totalScraped}`);
-    console.log(`Matched to RMP: ${summary.matched}`);
-    console.log(`New professors (no RMP): ${summary.newProfessors}`);
-    console.log(`Courses linked: ${summary.coursesLinked}`);
-    console.log(`Courses failed: ${summary.coursesFailed}`);
-    if (summary.errors.length > 0) {
-        console.log(`Errors: ${summary.errors.length}`);
     }
 
     return summary;

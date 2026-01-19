@@ -4,8 +4,7 @@ import { fetchProfessors } from "../scrapers/prof-catalogue";
 import { fetchPosts } from "../scrapers/reddit";
 import { syncProfessorsToCourses } from "../services/professor-course-service";
 import { fullProfessorSync } from "../services/professor-sync-service";
-
-
+import { scrapeRedditForDepartment, scrapeRedditForCourse } from "../services/reddit-service";
 
 const router = Router();
 
@@ -136,5 +135,57 @@ router.post("/professor-full-sync", async (req, res) => {
         });
     }
 });
+
+router.post("/reddit/department", async (req, res) => {
+    try {
+        const department = req.query.department as string;
+
+        if (!department) {
+            return res.status(400).json({
+                error: "Department parameter is required (e.g. ?department=CMPUT)"
+            });
+        }
+
+        const result = await scrapeRedditForDepartment(department);
+
+        res.json({
+            success: true,
+            message: `Scraped Reddit for ${department}`,
+            result
+        });
+
+    } catch (error) {
+        console.error("Error scraping Reddit for department:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        res.status(500).json({ success: false, error: errorMessage });
+    }
+});
+
+router.post("/reddit/course", async (req, res) => {
+    try {
+        const courseCode = req.query.courseCode as string;
+        const maxPages = req.query.maxPages ? Number(req.query.maxPages) : 2;
+
+        if (!courseCode) {
+            return res.status(400).json({
+                error: "courseCode parameter is required (e.g. ?courseCode=CMPUT 174)"
+            });
+        }
+
+        const result = await scrapeRedditForCourse(courseCode, maxPages);
+
+        res.json({
+            success: true,
+            message: `Scraped Reddit for ${courseCode}`,
+            result
+        });
+
+    } catch (error) {
+        console.error("Error scraping Reddit for course:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        res.status(500).json({ success: false, error: errorMessage });
+    }
+});
+
 
 export default router;

@@ -1,8 +1,4 @@
 /**
- * Unified Professor Sync Service
- *
- * Combines RMP scraping + UAlberta scraping + matching + saving in one pipeline
- *
  * Workflow:
  * 1. Scrape RMP for department → get all professors with ratings
  * 2. Save RMP professors to DB
@@ -16,26 +12,8 @@ import { getProfessor, bulkSaveProfessors } from "./rmp-service";
 import { fetchProfessors } from "../scrapers/prof-catalogue";
 import { syncProfessorsToCourses } from "./professor-course-service";
 import { normalizeDepartment } from "../utils/professor-utils";
+import { FullSyncSummary } from "./types";
 
-interface FullSyncSummary {
-    department: string;
-    rmpScraped: number;
-    rmpSaved: number;
-    ualbertaScraped: number;
-    matchedToRMP: number;
-    newProfessors: number;
-    coursesLinked: number;
-    coursesFailed: number;
-    errors: string[];
-}
-
-/**
- * Full sync pipeline for a department
- *
- * @param ualbertaDepartment - Department name as it appears in UAlberta directory 
- * @param schoolId - RMP school ID (defaults to UAlberta)
- * @param rmpDepartmentId - Optional RMP department ID for filtering
- */
 export async function fullProfessorSync(ualbertaDepartment: string, schoolId: string = "U2Nob29sLTE0MDc=", rmpDepartmentId: string = ""): Promise<FullSyncSummary> {
 
     const summary: FullSyncSummary = {

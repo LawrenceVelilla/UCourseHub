@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import * as professors from "./professors";
 import * as courses from "./courses";
 import * as professorCourses from "./professor_courses";
+import * as reddit from "./reddit";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ export const db = drizzle(pool, {
         ...professors,
         ...courses,
         ...professorCourses,
+        ...reddit,
     },
 });
 

@@ -5,42 +5,7 @@
 import { db } from "../config/db/index";
 import { professors } from "../config/db/professors";
 import { sql } from "drizzle-orm";
-
-
-interface Professor {
-    id: string;
-    first_name: string;
-    last_name: string;
-    department: string;
-    rmp_id: number;
-    would_take_again: number;
-    num_ratings: number;
-    avg_rating: number;
-    difficulty: number;
-    created_at: string;
-}
-
-interface QueryObject {
-    schoolID: string;
-    text: string;
-    fallback: boolean;
-    departmentID?: string;
-}
-
-interface variables {
-    query: QueryObject;
-    first: number;
-    after?: string;
-    schoolID: string;
-    includeSchoolFilter: boolean;
-}
-
-interface payload {
-    query: string;
-    variables: variables;
-}
-
-
+import { Professor, QueryObject, variables, payload } from "./types";
 
 const RMP_API_URL = "https://www.ratemyprofessors.com/graphql";
 

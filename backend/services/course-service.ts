@@ -4,51 +4,7 @@ import { scrapeCoursePage } from '../scrapers/course-catalogue';
 import { db } from '../config/db';
 import { courses } from '../config/db/courses';
 import { v4 as uuidv4 } from 'uuid';
-
-export type RequirementsData = {
-    prerequisites?: RequirementCondition;
-    corequisites?: RequirementCondition;
-    notes?: string;
-}
-
-export type RequirementCondition = {
-    operator: 'AND' | 'OR' | 'STANDALONE' | 'WILDCARD' | string;
-    conditions?: RequirementCondition[];
-    courses?: string[];
-    pattern?: string;
-    description?: string;
-}
-
-export type RawCourse = {
-    department: string;
-    courseCode: string;
-    title: string;
-    units: {
-        credits: number | null;
-        feeIndex: number | null;
-        term: string | null;
-    };
-    description: string;
-    url: string | undefined;
-}
-
-export type FinalCourseDetails = {
-    department: string;
-    description: string;
-    courseCode: string;
-    title: string;
-    keywords?: string[];
-    units: {
-        credits: number | null;
-        feeIndex: number | null;
-        term: string | null;
-    };
-    requirements: RequirementsData;
-    flattenedPrerequisites: string[];
-    flattenedCorequisites: string[];
-    url: string | null;
-    updatedAt: string;
-}
+import { FinalCourseDetails, RawCourse } from './types';
 
 async function descriptionParser(description: string): Promise<any> {
     const prompt = description
@@ -199,7 +155,5 @@ export async function scrapeAndSaveDepartmentCourses(departmentCode: string, fro
             console.error(`Failed to save course ${course.department} ${course.courseCode}`);
         }
     }
-
-    console.log(`Successfully saved ${savedCount}/${processedCourses.length} courses for ${departmentCode}`);
     return savedCount;
 }
