@@ -2,6 +2,7 @@ import { Router } from "express";
 import { filterByDepartment, getProfessors, getProfessorInfo } from "../scrapers/prof-catalogue";
 import { scrapeAndSaveDepartmentCourses } from "../services/course-service";
 import { fetchProfessors } from "../scrapers/prof-catalogue";
+import { fetchPosts, fetchPostComments } from "../scrapers/reddit";
 
 
 
@@ -72,6 +73,24 @@ router.get("/course-scraper", async (req, res) => {
     } catch (error) {
         console.error("Error scraping courses:", error);
         res.status(500).json({ error: "Failed to scrape courses" });
+    }
+});
+
+
+router.get("/reddit-scraper", async (req, res) => {
+    const courseCode = req.query.courseCode as string;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+    if (!courseCode) {
+        return res.status(400).json({ error: "Course code parameter is required" });
+    }
+
+    try {
+        const posts = await fetchPosts(courseCode, limit);
+        res.json({ message: "Success", posts });
+    } catch (error) {
+        console.error("Error scraping posts:", error);
+        res.status(500).json({ error: "Failed to scrape posts" });
     }
 });
 
