@@ -1,14 +1,11 @@
 import { pgTable, text, timestamp, uuid, jsonb, index, uniqueIndex, customType } from "drizzle-orm/pg-core";
 
-// Custom type for PostgreSQL tsvector (full-text search)
 const tsvector = customType<{ data: string }>({
     dataType() {
         return 'tsvector';
     },
 });
 
-
-// In public schema
 export const courses = pgTable('courses', {
     id: uuid('id').primaryKey(),
     department: text('department').notNull(),
@@ -23,18 +20,14 @@ export const courses = pgTable('courses', {
     units: jsonb('units'),
     search_vector: tsvector('search_vector'),
     updatedAt: timestamp('updatedAt').defaultNow(),
-}, (table) => ({
-    // Unique constraint: one course code per department
-    departmentCourseCodeUnique: uniqueIndex('courses_department_courseCode_key')
+}, (table) => [
+    uniqueIndex('courses_department_courseCode_key')
         .on(table.department, table.courseCode),
-    // Index for department lookups
-    departmentIdx: index('idx_courses_department').on(table.department),
-    // GIN indexes for array searches
-    prereqsIdx: index('idx_courses_prereqs').using('gin', table.flattenedPrerequisites),
-    coreqsIdx: index('idx_courses_coreqs').using('gin', table.flattenedCorequisites),
-    // Full-text search index
-    searchVectorIdx: index('idx_courses_search_vector').using('gin', table.search_vector),
-}));
+    index('idx_courses_department').on(table.department),
+    index('idx_courses_prereqs').using('gin', table.flattenedPrerequisites),
+    index('idx_courses_coreqs').using('gin', table.flattenedCorequisites),
+    index('idx_courses_search_vector').using('gin', table.search_vector),
+]);
 
 
 

@@ -36,13 +36,17 @@ const BASE_URL = "https://apps.ualberta.ca/directory/search/advanced";
 // Id for the input field DepartmentId-ts-control
 export async function filterByDepartment(department: string) {
     let options = new chrome.Options();
-    // Remove headless mode temporarily to debug
     options.addArguments('--headless');
     options.addArguments('--disable-gpu');
     options.addArguments('--no-sandbox');
     let driver = await new Builder().forBrowser(Browser.CHROME).setChromeOptions(options).build();
 
     try {
+        if (department === "Psychology1") {
+            department = "Psychology Science";
+        } else if (department === "Psychology") {
+            department = "Psychology";
+        }
         console.log("Navigating to:", BASE_URL);
         await driver.get(BASE_URL);
 
@@ -193,8 +197,6 @@ export async function fetchProfessors(department: string): Promise<any> {
     return detailedProfs;
 }
 
-
-// Gets the current professors from the Database
 export async function getDepartmentProfessors(department: string) {
     const profs = await db.select().from(professors).where(eq(professors.department, department));
     return profs;

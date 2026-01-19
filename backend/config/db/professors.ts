@@ -12,7 +12,7 @@ export const professors = pgTable('professors', {
     num_ratings: integer('num_ratings').default(0),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-    nameDepartmentUnique: uniqueIndex('professors_name_department_key')
+}, (table) => [
+    uniqueIndex('professors_name_department_key')
         .on(table.name, table.department),
-}));
+]);

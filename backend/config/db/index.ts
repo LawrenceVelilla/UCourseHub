@@ -15,7 +15,6 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
 });
 
-// Drizzle instance with schema for relational queries
 export const db = drizzle(pool, {
     schema: {
         ...professors,
@@ -24,7 +23,6 @@ export const db = drizzle(pool, {
     },
 });
 
-// Keep raw query for complex SQL or migrations
 export const query = (text: string, params?: any[]) => {
     return pool.query(text, params);
 };

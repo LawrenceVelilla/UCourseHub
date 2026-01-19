@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { filterByDepartment, getProfessors, getProfessorInfo } from "../scrapers/prof-catalogue";
 import { scrapeAndSaveDepartmentCourses } from "../services/course-service";
 import { fetchProfessors } from "../scrapers/prof-catalogue";
-import { fetchPosts, fetchPostComments } from "../scrapers/reddit";
+import { fetchPosts } from "../scrapers/reddit";
+import { syncProfessorsToCourses } from "../services/professor-course-service";
+import { fullProfessorSync } from "../services/professor-sync-service";
 
 
 
@@ -21,36 +22,6 @@ router.get("/prof-scraper", async (req, res) => {
     } catch (error) {
         console.error("Error scraping professors:", error);
         res.status(500).json({ error: "Failed to scrape professors" });
-    }
-});
-
-router.get("/prof-scraper/test", async (req, res) => {
-    try {
-
-        const department = req.query.department as string;
-        const pageSource = await filterByDepartment(department);
-        const profs = await getProfessors(pageSource);
-        res.json({ message: "Success", profs });
-    } catch (error) {
-        console.error("Error scraping professors:", error);
-        res.status(500).json({ error: "Failed to scrape professors" });
-    }
-});
-
-// Test route for getProfessorInfo - e.g. /prof-info?url=/directory/person/ababzade
-router.get("/prof-info", async (req, res) => {
-    const url = req.query.url as string;
-
-    if (!url) {
-        return res.status(400).json({ error: "url parameter is required (e.g. /directory/person/ababzade)" });
-    }
-
-    try {
-        const profInfo = await getProfessorInfo(url);
-        res.json({ message: "Success", profInfo });
-    } catch (error) {
-        console.error("Error getting professor info:", error);
-        res.status(500).json({ error: "Failed to get professor info" });
     }
 });
 
@@ -91,6 +62,78 @@ router.get("/reddit-scraper", async (req, res) => {
     } catch (error) {
         console.error("Error scraping posts:", error);
         res.status(500).json({ error: "Failed to scrape posts" });
+    }
+});
+
+// Already have RMP data, just need to link professors to courses
+router.post("/professor-sync", async (req, res) => {
+    try {
+        const department = req.query.department as string;
+
+        if (!department) {
+            return res.status(400).json({
+                error: "Department parameter is required (e.g. ?department=Computing Science)"
+            });
+        }
+
+        const scrapedProfs = await fetchProfessors(department);
+        console.log(`Scraped ${scrapedProfs.length} professors`);
+
+        if (scrapedProfs.length === 0) {
+            return res.json({
+                success: true,
+                message: "No professors found for this department",
+                summary: {
+                    totalScraped: 0,
+                    matched: 0,
+                    newProfessors: 0,
+                    coursesLinked: 0,
+                    coursesFailed: 0,
+                    errors: []
+                }
+            });
+        }
+
+        const summary = await syncProfessorsToCourses(scrapedProfs, department);
+
+        res.json({
+            success: true,
+            message: `Synced ${summary.totalScraped} professors for ${department}`,
+            summary
+        });
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        res.status(500).json({
+            success: false,
+            error: errorMessage
+        });
+    }
+});
+
+router.post("/professor-full-sync", async (req, res) => {
+    try {
+        const department = req.query.department as string;
+        const schoolId = req.query.schoolId as string | undefined;
+        const rmpDepartmentId = req.query.rmpDepartmentId as string | undefined;
+
+        if (!department) {
+            return res.status(400).json({
+                error: "Department parameter is required (e.g. ?department=Computing Science)"
+            });
+        }
+
+        const summary = await fullProfessorSync(department, schoolId, rmpDepartmentId);
+
+        res.json({ success: true, message: `Full sync completed for ${department}`, summary });
+
+    } catch (error) {
+        console.error("Error in full professor sync:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        res.status(500).json({
+            success: false,
+            error: errorMessage
+        });
     }
 });
 
