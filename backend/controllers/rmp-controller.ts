@@ -11,7 +11,6 @@ export async function healthCheck(req: Request, res: Response) {
 //  for the intial scraping
 export async function fetchProfessors(req: Request, res: Response) {
     try {
-        // Set Connection: close to ensure curl exits properly
         res.setHeader('Connection', 'close');
 
         const { schoolId, department, departmentId, save = "false" } = req.query;

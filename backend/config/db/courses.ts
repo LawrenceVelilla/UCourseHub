@@ -21,8 +21,8 @@ export const courses = pgTable('courses', {
     search_vector: tsvector('search_vector'),
     updatedAt: timestamp('updatedAt').defaultNow(),
 }, (table) => [
-    uniqueIndex('courses_department_courseCode_key')
-        .on(table.department, table.courseCode),
+    uniqueIndex('courses_courseCode_key')
+        .on(table.courseCode),
     index('idx_courses_department').on(table.department),
     index('idx_courses_prereqs').using('gin', table.flattenedPrerequisites),
     index('idx_courses_coreqs').using('gin', table.flattenedCorequisites),

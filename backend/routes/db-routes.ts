@@ -1,5 +1,7 @@
 import express from "express";
 import { getDepartmentProfessors } from "../scrapers/prof-catalogue";
+import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller";
+import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller";
 
 const router = express.Router();
 
@@ -12,6 +14,56 @@ router.get("/", async (req, res) => {
 
     try {
         const professors = await getDepartmentProfessors(department);
+        res.json(professors);
+    } catch (error) {
+        console.error("Error fetching professors:", error);
+        res.status(500).json({ error: "Failed to fetch professors" });
+    }
+});
+
+router.get("/course", async (req, res) => {
+    const courseCode = req.query.courseCode as string;
+
+    if (!courseCode) {
+        return res.status(400).json({ error: "Course code parameter is required" });
+    }
+
+    try {
+        const course = await fetchCourse(courseCode);
+        res.json(course);
+    } catch (error) {
+        console.error("Error fetching course:", error);
+        res.status(500).json({ error: "Failed to fetch course" });
+    }
+});
+
+router.get("/dependents", async (req, res) => {
+    const courseCode = req.query.courseCode as string;
+
+    if (!courseCode) {
+        return res.status(400).json({ error: "Course code parameter is required" });
+    }
+
+    try {
+        const dependents = await fetchDependents(courseCode);
+        res.json(dependents);
+    } catch (error) {
+        console.error("Error fetching dependents:", error);
+        res.status(500).json({ error: "Failed to fetch dependents" });
+    }
+});
+
+router.get("/reddit/discussions", fetchDiscussionsByCourseId);
+
+router.get("/professors", async (req, res) => {
+    const courseId = req.query.courseId as string;
+
+    if (!courseId) {
+        return res.status(400).json({ error: "courseId parameter is required" });
+    }
+
+    try {
+        const professors = await fetchProfessorsByCourseId(courseId);
         res.json(professors);
     } catch (error) {
         console.error("Error fetching professors:", error);
