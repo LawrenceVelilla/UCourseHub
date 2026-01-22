@@ -232,11 +232,27 @@ export async function scrapeRedditForCourse(courseCode: string, maxPages: number
     return result;
 }
 
-async function getDistinctDepartments(): Promise<string[]> {
-    const results = await db
-        .selectDistinct({ department: courses.department })
-        .from(courses);
-    return results.map(r => r.department);
+export async function getDiscussionsByCourseId(courseId: string, limit: number = 10) {
+    const discussions = await db
+        .select({
+            id: redditPosts.id,
+            title: redditPosts.title,
+            preview: redditPosts.selftext,
+            url: redditPosts.url,
+            upvotes: redditPosts.score,
+            comments: redditPosts.numComments,
+            createdAt: redditPosts.createdUtc,
+        })
+        .from(redditPostCourses)
+        .innerJoin(redditPosts, eq(redditPostCourses.postId, redditPosts.id))
+        .where(eq(redditPostCourses.courseId, courseId))
+        .orderBy(sql`${redditPosts.score} DESC`)
+        .limit(limit);
+
+    return discussions.map(d => ({
+        ...d,
+        preview: d.preview ? d.preview.substring(0, 200) + (d.preview.length > 200 ? '...' : '') : '',
+    }));
 }
 
 export async function getRedditStats(): Promise<{

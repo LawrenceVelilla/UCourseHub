@@ -22,8 +22,8 @@ export async function findMatchingProfessor(scrapedName: string, department: str
         return null;
     }
 
-    // Get ALL professors with the same last name in the department
-    const lastNameMatches = await db
+    // First try: match by last name within the same department
+    let lastNameMatches = await db
         .select({ id: professors.id, name: professors.name })
         .from(professors)
         .where(
@@ -32,6 +32,16 @@ export async function findMatchingProfessor(scrapedName: string, department: str
                 ilike(professors.name, `%${lastName}`)
             )
         );
+
+    // Second try: if no matches in department, search across ALL departments
+    // This handles cases where RMP department name differs from UAlberta department name
+    if (lastNameMatches.length === 0) {
+        console.log(`No match in "${department}", searching all departments for "${scrapedName}"`);
+        lastNameMatches = await db
+            .select({ id: professors.id, name: professors.name })
+            .from(professors)
+            .where(ilike(professors.name, `%${lastName}`));
+    }
 
     if (lastNameMatches.length === 0) {
         return null;

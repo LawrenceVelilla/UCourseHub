@@ -146,16 +146,12 @@ interface FetchOptions {
     skipRateLimit?: boolean;
 }
 
-async function fetchWithRetry(
-    url: string,
-    options: FetchOptions = {}
-): Promise<any> {
+async function fetchWithRetry(url: string, options: FetchOptions = {}): Promise<any> {
     const { maxRetries = MAX_RETRIES, skipRateLimit = false } = options;
     const token = await getAccessToken();
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-            // Wait for rate limit slot
             if (!skipRateLimit) {
                 await rateLimiter.waitForSlot();
             }
@@ -177,8 +173,6 @@ async function fetchWithRetry(
                 await sleep(backoff);
                 continue;
             }
-
-            // Handle other errors
             if (!response.ok) {
                 throw new Error(`Reddit API error: ${response.status} ${response.statusText}`);
             }

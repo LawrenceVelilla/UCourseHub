@@ -154,7 +154,7 @@ function parseProfessor(node: any, filterDepartment: string): Professor {
         const rmpId: number = node.legacyId;
         const firstName: string = node.firstName;
         const lastName: string = node.lastName;
-        const department: string = filterDepartment || node.department;
+        const department: string = node.department || filterDepartment;
         const avgRating: number = node.avgRating;
         const avgDifficulty: number = node.avgDifficulty;
         const numRatings: number = node.numRatings;
@@ -177,7 +177,20 @@ function parseProfessor(node: any, filterDepartment: string): Professor {
 export async function bulkSaveProfessors(professorList: Professor[]) {
     if (professorList.length === 0) return 0;
 
-    const values = professorList.map(p => ({
+    // Deduplicate by name (lowercased), keeping the entry with most reviews
+    // This handles cases where the same professor has multiple RMP profiles
+    const dedupedByName = new Map<string, Professor>();
+    for (const prof of professorList) {
+        const nameKey = `${prof.first_name} ${prof.last_name}`.toLowerCase();
+        const existing = dedupedByName.get(nameKey);
+        if (!existing || prof.num_ratings > existing.num_ratings) {
+            dedupedByName.set(nameKey, prof);
+        }
+    }
+    const uniqueProfessors = Array.from(dedupedByName.values());
+    console.log(`Deduplicated ${professorList.length} professors to ${uniqueProfessors.length} unique by name`);
+
+    const values = uniqueProfessors.map(p => ({
         id: p.id,
         name: `${p.first_name} ${p.last_name}`,
         department: p.department,
@@ -189,18 +202,21 @@ export async function bulkSaveProfessors(professorList: Professor[]) {
     }));
 
     try {
+        // Upsert using rmp_id as conflict target
+        // Only update if new data has more reviews (more reviews = more reliable data)
         await db.insert(professors)
             .values(values)
             .onConflictDoUpdate({
                 target: professors.rmp_id,
                 set: {
-                    name: sql`EXCLUDED.name`,
-                    department: sql`EXCLUDED.department`,
-                    would_take_again: sql`EXCLUDED.would_take_again`,
-                    num_ratings: sql`EXCLUDED.num_ratings`,
-                    avg_rating: sql`EXCLUDED.avg_rating`,
-                    difficulty: sql`EXCLUDED.difficulty`,
-                    updatedAt: new Date(),
+                    id: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.id ELSE ${professors.id} END`,
+                    name: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.name ELSE ${professors.name} END`,
+                    department: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.department ELSE ${professors.department} END`,
+                    would_take_again: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.would_take_again ELSE ${professors.would_take_again} END`,
+                    num_ratings: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.num_ratings ELSE ${professors.num_ratings} END`,
+                    avg_rating: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.avg_rating ELSE ${professors.avg_rating} END`,
+                    difficulty: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN EXCLUDED.difficulty ELSE ${professors.difficulty} END`,
+                    updatedAt: sql`CASE WHEN EXCLUDED.num_ratings > COALESCE(${professors.num_ratings}, 0) THEN NOW() ELSE ${professors.updatedAt} END`,
                 },
             });
 

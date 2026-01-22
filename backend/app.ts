@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import rmpRouter from "./routes/rmp-routes";
 import scraperRouter from "./routes/scraper-routes";
 import dbRouter from "./routes/db-routes";
@@ -9,14 +10,15 @@ const app = express();
 dotenv.config();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
 // Routes
-app.use("/admin/rmp", rmpRouter);
-app.use("/admin/scraper", scraperRouter);
-app.use("/admin/db", dbRouter);
+app.use("/api/admin/rmp", rmpRouter);
+app.use("/api/admin/scraper", scraperRouter);
+app.use("/api", dbRouter);
 
 // Checking if its up
 app.get("/", (req, res) => {

@@ -107,7 +107,7 @@ export async function saveCourse(courseDetails: FinalCourseDetails): Promise<voi
             updatedAt: new Date(),
             search_vector: undefined,
         }).onConflictDoUpdate({
-            target: [courses.department, courses.courseCode],
+            target: [courses.courseCode],
             set: {
                 title: courseDetails.title,
                 description: courseDetails.description,

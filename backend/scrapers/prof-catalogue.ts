@@ -10,7 +10,8 @@ import { professors } from "../config/db/professors";
 import { eq } from "drizzle-orm";
 
 const validRoles: string[] = [
-    "Professor", "Full Lecturer", "Associate Professor", "ATS Assistant Lecturer", "Full Professor", "Associate Professor", "Assistant Lecturer", "Adjunct Professor", "Assistant Professor"]
+    "Professor", "Full Lecturer", "Associate Professor", "Associate Lecturer", "ATS Assistant Lecturer", "Full Professor", "Associate Professor", "Assistant Lecturer", "Adjunct Professor", "Assistant Professor", "ATS Full Lecturer", "Science Faculty Lecturer"
+];
 
 
 interface ProfCourse {
