@@ -118,7 +118,7 @@ router.post("/professor-full-sync", async (req, res) => {
 
         if (!department) {
             return res.status(400).json({
-                error: "Department parameter is required (e.g. ?department=Computing Science)"
+                error: "Department parameter is required"
             });
         }
 

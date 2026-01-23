@@ -232,6 +232,10 @@ export async function scrapeRedditForCourse(courseCode: string, maxPages: number
     return result;
 }
 
+export async function scrapeRedditSearchedCourses(courseCodes: string[], maxPagesPerCourse: number = 2): Promise<ScrapeResult[]> {
+    // This is the function if I want the posts with the Course SPECIFICALLY searched so you know its directly relevant
+}
+
 export async function getDiscussionsByCourseId(courseId: string, limit: number = 10) {
     const discussions = await db
         .select({
