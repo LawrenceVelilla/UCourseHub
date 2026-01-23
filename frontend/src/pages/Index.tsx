@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -14,8 +14,10 @@ import {
     RequisiteTreeSkeleton,
     NeededByCardSkeleton,
     ProfessorCardSkeleton,
+    RedditDiscussionSkeleton
 } from '@/components/skeletons';
 import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/use-course';
+import Footer from '@/components/layout/Footer';
 
 const Index = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -25,7 +27,14 @@ const Index = () => {
 
     const { data: dependents, isLoading: isDependentsLoading, error: dependentsError } = useDependents(courseCode);
 
-    const { data: discussions } = useRedditDiscussions(course?.id ?? null);
+    const {
+        data: discussionsData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useRedditDiscussions(course?.id ?? null);
+
+    const discussions = discussionsData?.pages.flatMap(page => page.discussions) ?? [];
 
     const { data: professors } = useProfessors(course?.id ?? null);
 
@@ -61,7 +70,7 @@ const Index = () => {
             <main className="container py-8">
                 <section className="mb-12 text-center">
                     <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
-                        UCoursePlanner
+                        UCourseHub
                     </h1>
                     <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                         Plan your University of Alberta courses with ease. Search courses, check prerequisites, and build your academic path.
@@ -76,7 +85,14 @@ const Index = () => {
                     <div className="animate-fade-in space-y-6">
                         <div className="grid gap-6 lg:grid-cols-12">
                             <aside className="lg:col-span-3">
-                                <RedditDiscussions discussions={discussions ?? []} />
+                                <Suspense fallback={<RedditDiscussionSkeleton />}>
+                                    <RedditDiscussions
+                                        discussions={discussions}
+                                        fetchNextPage={fetchNextPage}
+                                        hasNextPage={hasNextPage}
+                                        isFetchingNextPage={isFetchingNextPage}
+                                    />
+                                </Suspense>
                             </aside>
 
                             <div className="space-y-6 lg:col-span-9">
@@ -152,6 +168,7 @@ const Index = () => {
                     </div>
                 )}
             </main>
+            <Footer />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { BookOpen, Search, Calculator, Calendar } from 'lucide-react';
+import { Logo } from '../ui/logo';
 
 const Header = () => {
     const navItems = [
@@ -13,10 +14,10 @@ const Header = () => {
             <div className="container flex h-16 items-center justify-between">
                 <NavLink to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                        <BookOpen className="h-5 w-5 text-primary-foreground" />
+                        <Logo />
                     </div>
                     <span className="font-serif text-xl font-semibold text-foreground">
-                        UCoursePlanner
+                        UCourseHub
                     </span>
                 </NavLink>
 

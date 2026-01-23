@@ -4,9 +4,10 @@ import { ChevronDown } from 'lucide-react';
 interface ScrollableCardContentProps {
     children: React.ReactNode;
     maxHeight?: string;
+    onReachBottom?: () => void;
 }
 
-const ScrollableCardContent = ({ children, maxHeight = '280px' }: ScrollableCardContentProps) => {
+const ScrollableCardContent = ({ children, maxHeight = '280px', onReachBottom }: ScrollableCardContentProps) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [hasOverflow, setHasOverflow] = useState(false);
     const [isAtBottom, setIsAtBottom] = useState(false);
@@ -27,7 +28,12 @@ const ScrollableCardContent = ({ children, maxHeight = '280px' }: ScrollableCard
     const handleScroll = () => {
         if (scrollRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-            setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 20);
+            const atBottom = scrollTop + clientHeight >= scrollHeight - 20;
+            setIsAtBottom(atBottom);
+
+            if (atBottom && onReachBottom) {
+                onReachBottom();
+            }
         }
     };
 
@@ -41,7 +47,7 @@ const ScrollableCardContent = ({ children, maxHeight = '280px' }: ScrollableCard
     };
 
     return (
-        <div className="relative">
+        <div className="relative animate-fade-in">
             {hasOverflow && !isAtBottom && (
                 <button
                     onClick={scrollToBottom}

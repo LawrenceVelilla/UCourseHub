@@ -1,6 +1,5 @@
 /*
 * This file is responsible for scraping professor data from RateMyProfessor.
-* Will be expanded later to handle saving to prof table, and also for decoding base64 school and department IDs (could be in util as well).
 */
 import { db } from "../config/db/index";
 import { professors } from "../config/db/professors";

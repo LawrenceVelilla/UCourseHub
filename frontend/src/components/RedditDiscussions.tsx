@@ -1,12 +1,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ExternalLink, MessageCircle, ArrowUp } from 'lucide-react';
+import { ExternalLink, MessageCircle, ArrowUp, Loader2 } from 'lucide-react';
 import ScrollableCardContent from './ScrollableCardContent';
 
 interface RedditDiscussionsProps {
     discussions: any[];
+    fetchNextPage?: () => void;
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
 }
 
-const RedditDiscussions = ({ discussions }: RedditDiscussionsProps) => {
+const RedditDiscussions = ({
+    discussions,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+}: RedditDiscussionsProps) => {
+    const handleReachBottom = () => {
+        if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
+            fetchNextPage();
+        }
+    };
     return (
         <Card className="h-[36rem] shadow-earth">
             <CardHeader className="pb-3">
@@ -23,11 +36,11 @@ const RedditDiscussions = ({ discussions }: RedditDiscussionsProps) => {
             </CardHeader>
             <CardContent>
                 {discussions.length > 0 ? (
-                    <ScrollableCardContent maxHeight="430px">
+                    <ScrollableCardContent maxHeight="430px" onReachBottom={handleReachBottom}>
                         <div className="space-y-3">
                             {discussions.map((discussion, idx) => (
                                 <a
-                                    key={idx}
+                                    key={discussion.id || idx}
                                     href={discussion.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -54,6 +67,11 @@ const RedditDiscussions = ({ discussions }: RedditDiscussionsProps) => {
                                     </div>
                                 </a>
                             ))}
+                            {isFetchingNextPage && (
+                                <div className="flex justify-center py-2">
+                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                </div>
+                            )}
                         </div>
                     </ScrollableCardContent>
                 ) : (

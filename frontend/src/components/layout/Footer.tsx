@@ -5,7 +5,7 @@ const Footer = () => {
         <footer className="border-t bg-card">
             <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
                 <p>
-                    &copy; {new Date().getFullYear()} UCourseHub. No affiliation with the University of Alberta, and is a personal project by Lawrence Velilla.
+                    &copy; {new Date().getFullYear()} UCourseHub. This tool has no affiliation with the University of Alberta, and is a personal project by Lawrence Velilla.
                 </p>
             </div>
             {/* TODO: Add links to GitHub, LinkedIn, and Portfolio */}
@@ -19,7 +19,7 @@ const Footer = () => {
                         LinkedIn
                     </a>
                     {' '}
-                    <a href="https://lawrencevelilla.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://lawrencevelilla.vercel.app" target="_blank" rel="noopener noreferrer">
                         Portfolio
                     </a>
                 </p>

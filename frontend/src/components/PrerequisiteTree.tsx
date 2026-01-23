@@ -33,7 +33,7 @@ const RenderGroup = ({ group, depth = 0 }: { group: any; depth?: number }) => {
 
 const PrerequisiteTree = ({ prerequisites }: PrerequisiteTreeProps) => {
     return (
-        <Card className="shadow-earth">
+        <Card className="shadow-earth ">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <GitBranch className="h-5 w-5 text-primary" />

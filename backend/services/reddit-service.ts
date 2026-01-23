@@ -232,11 +232,94 @@ export async function scrapeRedditForCourse(courseCode: string, maxPages: number
     return result;
 }
 
+/**
+ * Scrape Reddit for courses using title-specific search
+ * This searches specifically for course codes in POST TITLES to avoid irrelevant matches
+ * (e.g., prevents "291" in schedule requests from matching CMPUT 291 discussions)
+ */
 export async function scrapeRedditSearchedCourses(courseCodes: string[], maxPagesPerCourse: number = 2): Promise<ScrapeResult[]> {
-    // This is the function if I want the posts with the Course SPECIFICALLY searched so you know its directly relevant
+    console.log(`Scraping Reddit for ${courseCodes.length} courses with title-specific search`);
+
+    const results: ScrapeResult[] = [];
+
+    for (const courseCode of courseCodes) {
+        const result: ScrapeResult = {
+            query: courseCode,
+            postsScraped: 0,
+            postsNew: 0,
+            postsSaved: 0,
+            commentsSaved: 0,
+            coursesLinked: 0,
+            errors: [],
+        };
+
+        try {
+            const titleQuery = `title:"${courseCode}"`;
+            const posts = await fetchPostsPaginated(titleQuery, 100, maxPagesPerCourse);
+            result.postsScraped = posts.length;
+
+            console.log(`Found ${posts.length} posts with "${courseCode}" in title`);
+
+            const qualityPosts = filterQualityPosts(posts);
+
+            for (const post of qualityPosts) {
+                try {
+                    const text = `${post.title} ${post.selftext}`;
+                    const courseCodes = extractCourseCodes(text);
+
+                    // Ensure the searched course code is included
+                    if (!courseCodes.includes(courseCode)) {
+                        courseCodes.push(courseCode);
+                    }
+
+                    const saveResult = await savePost(post, courseCodes);
+                    result.postsSaved++;
+                    if (saveResult.isNew) result.postsNew++;
+                    result.coursesLinked += saveResult.coursesLinked;
+
+                    if (post.num_comments > 0) {
+                        const comments = await fetchPostComments(post.id, 50);
+                        const commentsSaved = await saveComments(post.id, comments);
+                        result.commentsSaved += commentsSaved;
+                        await sleep(500);
+                    }
+
+                } catch (error) {
+                    const msg = error instanceof Error ? error.message : 'Unknown error';
+                    result.errors.push(`Post ${post.id}: ${msg}`);
+                }
+            }
+
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : 'Unknown error';
+            result.errors.push(`Course scrape failed: ${msg}`);
+        }
+        results.push(result);
+    }
+
+    return results;
 }
 
-export async function getDiscussionsByCourseId(courseId: string, limit: number = 10) {
+export async function getDiscussionsByCourseId(
+    courseId: string,
+    limit: number = 10,
+    offset: number = 0
+) {
+    // Two-step query for better index usage:
+    // 1. Get post IDs for this course
+    // 2. Fetch post details with ordering
+    const postIds = await db
+        .select({ postId: redditPostCourses.postId })
+        .from(redditPostCourses)
+        .where(eq(redditPostCourses.courseId, courseId));
+
+    if (postIds.length === 0) {
+        return { discussions: [], hasMore: false };
+    }
+
+    const ids = postIds.map(p => p.postId);
+
+    // Fetch limit + 1 to check if there are more results
     const discussions = await db
         .select({
             id: redditPosts.id,
@@ -247,41 +330,20 @@ export async function getDiscussionsByCourseId(courseId: string, limit: number =
             comments: redditPosts.numComments,
             createdAt: redditPosts.createdUtc,
         })
-        .from(redditPostCourses)
-        .innerJoin(redditPosts, eq(redditPostCourses.postId, redditPosts.id))
-        .where(eq(redditPostCourses.courseId, courseId))
+        .from(redditPosts)
+        .where(sql`${redditPosts.id} IN ${ids}`)
         .orderBy(sql`${redditPosts.score} DESC`)
-        .limit(limit);
+        .limit(limit + 1)
+        .offset(offset);
 
-    return discussions.map(d => ({
-        ...d,
-        preview: d.preview ? d.preview.substring(0, 200) + (d.preview.length > 200 ? '...' : '') : '',
-    }));
-}
-
-export async function getRedditStats(): Promise<{
-    totalPosts: number;
-    totalComments: number;
-    totalPostCourseLinks: number;
-    coursesWithPosts: number;
-    coursesWithoutPosts: number;
-}> {
-    const [postsCount] = await db.select({ count: sql<number>`count(*)` }).from(redditPosts);
-    const [commentsCount] = await db.select({ count: sql<number>`count(*)` }).from(redditComments);
-    const [linksCount] = await db.select({ count: sql<number>`count(*)` }).from(redditPostCourses);
-
-    const coursesWithPostsResult = await db
-        .selectDistinct({ courseId: redditPostCourses.courseId })
-        .from(redditPostCourses);
-    const coursesWithPostsCount = coursesWithPostsResult.length;
-
-    const [totalCourses] = await db.select({ count: sql<number>`count(*)` }).from(courses);
+    const hasMore = discussions.length > limit;
+    const result = hasMore ? discussions.slice(0, limit) : discussions;
 
     return {
-        totalPosts: Number(postsCount.count),
-        totalComments: Number(commentsCount.count),
-        totalPostCourseLinks: Number(linksCount.count),
-        coursesWithPosts: coursesWithPostsCount,
-        coursesWithoutPosts: Number(totalCourses.count) - coursesWithPostsCount,
+        discussions: result.map(d => ({
+            ...d,
+            preview: d.preview ? d.preview.substring(0, 200) + (d.preview.length > 200 ? '...' : '') : '',
+        })),
+        hasMore,
     };
 }

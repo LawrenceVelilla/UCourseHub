@@ -4,7 +4,7 @@ import { fetchProfessors } from "../scrapers/prof-catalogue";
 import { fetchPosts } from "../scrapers/reddit";
 import { syncProfessorsToCourses } from "../services/professor-course-service";
 import { fullProfessorSync } from "../services/professor-sync-service";
-import { scrapeRedditForDepartment, scrapeRedditForCourse } from "../services/reddit-service";
+import { scrapeRedditForDepartment, scrapeRedditForCourse, scrapeRedditSearchedCourses } from "../services/reddit-service";
 
 const router = Router();
 
@@ -182,6 +182,42 @@ router.post("/reddit/course", async (req, res) => {
 
     } catch (error) {
         console.error("Error scraping Reddit for course:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        res.status(500).json({ success: false, error: errorMessage });
+    }
+});
+
+router.post("/reddit/courses/title-search", async (req, res) => {
+    try {
+        const courseCodes = req.body.courseCodes as string[];
+        const maxPagesPerCourse = req.query.maxPages ? Number(req.query.maxPages) : 2;
+
+        if (!courseCodes || !Array.isArray(courseCodes) || courseCodes.length === 0) {
+            return res.status(400).json({
+                error: "courseCodes array is required in request body (e.g. ['CMPUT 174', 'CMPUT 291'])"
+            });
+        }
+
+        const results = await scrapeRedditSearchedCourses(courseCodes, maxPagesPerCourse);
+
+        const summary = {
+            totalCourses: results.length,
+            totalPostsScraped: results.reduce((sum, r) => sum + r.postsScraped, 0),
+            totalPostsSaved: results.reduce((sum, r) => sum + r.postsSaved, 0),
+            totalPostsNew: results.reduce((sum, r) => sum + r.postsNew, 0),
+            totalCommentsSaved: results.reduce((sum, r) => sum + r.commentsSaved, 0),
+            totalCoursesLinked: results.reduce((sum, r) => sum + r.coursesLinked, 0),
+        };
+
+        res.json({
+            success: true,
+            message: `Scraped Reddit for ${courseCodes.length} courses using title-specific search`,
+            summary,
+            results
+        });
+
+    } catch (error) {
+        console.error("Error scraping Reddit for courses:", error);
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         res.status(500).json({ success: false, error: errorMessage });
     }
