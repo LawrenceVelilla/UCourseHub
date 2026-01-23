@@ -15,7 +15,7 @@ import {
     NeededByCardSkeleton,
     ProfessorCardSkeleton,
 } from '@/components/skeletons';
-import { useCourse, useDependents, useRedditDiscussions } from '@/hooks/use-course';
+import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/use-course';
 
 const Index = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +26,8 @@ const Index = () => {
     const { data: dependents, isLoading: isDependentsLoading, error: dependentsError } = useDependents(courseCode);
 
     const { data: discussions } = useRedditDiscussions(course?.id ?? null);
+
+    const { data: professors } = useProfessors(course?.id ?? null);
 
     useEffect(() => {
         if (courseError) {
@@ -57,7 +59,6 @@ const Index = () => {
             <Header />
 
             <main className="container py-8">
-                {/* Hero Section */}
                 <section className="mb-12 text-center">
                     <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
                         UCoursePlanner
@@ -67,21 +68,17 @@ const Index = () => {
                     </p>
                 </section>
 
-                {/* Search Section */}
                 <section className="mb-10 flex justify-center">
                     <CourseSearch onSearch={handleSearch} />
                 </section>
 
                 {courseCode ? (
                     <div className="animate-fade-in space-y-6">
-                        {/* Main Layout: Reddit + Course Info */}
                         <div className="grid gap-6 lg:grid-cols-12">
-                            {/* Reddit Discussions - Left Sidebar */}
                             <aside className="lg:col-span-3">
                                 <RedditDiscussions discussions={discussions ?? []} />
                             </aside>
 
-                            {/* Course Details - Main Content */}
                             <div className="space-y-6 lg:col-span-9">
                                 {isCourseLoading ? (
                                     <>
@@ -91,7 +88,7 @@ const Index = () => {
                                 ) : course ? (
                                     <>
                                         <CourseCard course={course} />
-                                        <ProfessorCard professors={[]} />
+                                        <ProfessorCard professors={professors ?? []} />
                                     </>
                                 ) : hasError ? (
                                     <CourseCardSkeleton />
@@ -105,7 +102,6 @@ const Index = () => {
                             </div>
                         </div>
 
-                        {/* Prerequisites, Needed By, Corequisites */}
                         <div className="grid gap-6 md:grid-cols-3">
                             {isLoading ? (
                                 <>

@@ -23,10 +23,17 @@ export interface NeededByCourse {
 }
 
 export interface Professor {
+    id: string;
     name: string;
-    rating: number;
-    rmpLink: string;
+    department: string;
+    rmpLink: string | null;
+    rating: number | null;
+    difficulty: number | null;
+    wouldTakeAgain: number | null;
+    numRatings: number | null;
     semester: string;
+    term: string;
+    year: number;
 }
 
 export interface RedditDiscussion {

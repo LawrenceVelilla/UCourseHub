@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { FinalCourseDetails, RedditDiscussion } from '@/types/course';
+import type { FinalCourseDetails, RedditDiscussion, Professor } from '@/types/course';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -78,6 +78,28 @@ export function useRedditDiscussions(courseId: string | null, limit: number = 10
     return useQuery({
         queryKey: ['reddit-discussions', courseId, limit],
         queryFn: () => fetchRedditDiscussions(courseId!, limit),
+        enabled: !!courseId,
+        staleTime: 1000 * 60 * 60,
+        gcTime: 1000 * 60 * 60 * 24,
+    });
+}
+
+async function fetchProfessors(courseId: string): Promise<Professor[]> {
+    const response = await fetch(
+        `${API_BASE_URL}/api/professors?courseId=${encodeURIComponent(courseId)}`
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch professors: ${response.statusText}`);
+    }
+
+    return response.json();
+}
+
+export function useProfessors(courseId: string | null) {
+    return useQuery({
+        queryKey: ['professors', courseId],
+        queryFn: () => fetchProfessors(courseId!),
         enabled: !!courseId,
         staleTime: 1000 * 60 * 60,
         gcTime: 1000 * 60 * 60 * 24,
