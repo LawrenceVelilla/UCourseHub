@@ -1,5 +1,5 @@
 import express from "express";
-import * as rmpController from "../../backend/controllers/rmp-controller";
+import * as rmpController from "../controllers/rmp-controller.js";
 
 const router = express.Router();
 

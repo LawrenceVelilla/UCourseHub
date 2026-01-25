@@ -57,7 +57,7 @@ const NeededByCard = ({ prereqDependents, coreqDependents }: NeededByCardProps) 
     const hasAnyDependents = prereqDependents.length > 0 || coreqDependents.length > 0;
 
     return (
-        <Card className="shadow-earth">
+        <Card className="card-needed-by shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <Users className="h-5 w-5 text-primary" />

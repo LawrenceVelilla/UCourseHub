@@ -1,8 +1,8 @@
 
-import { db } from "../config/db/index";
-import { courses } from "../config/db/courses";
-import { professors } from "../config/db/professors";
-import { professorCourses } from "../config/db/professor_courses";
+import { db } from "../config/db/index.js";
+import { courses } from "../config/db/courses.js";
+import { professors } from "../config/db/professors.js";
+import { professorCourses } from "../config/db/professor_courses.js";
 import { eq, sql, desc } from "drizzle-orm";
 
 
@@ -58,33 +58,6 @@ export async function fetchDependents(courseCode: string) {
     return { prereqDependents, coreqDependents };
 }
 
-export async function fetchPrerequisites(courseCode: string) {
-    // Use index for faster search (reverse lookups)
-}
-
-
-export async function fetchCorequisites(courseCode: string) {
-    // Get the courses that THIS course is a coreq for
-    // Use index for faster search (reverse lookups)
-}
-
-export async function fetchDepartmentCourses(department: string) {
-    // Get all courses in a department
-    // Use index for faster search
-}
-
-export async function fetchAllCourses() {
-    // Get all courses
-    // Use index for faster search
-    // With pagination (could be handled by the client using tanstack)
-}
-
-export async function fetchCourseProfs(professorId: string) {
-    // Get all courses taught by a professor
-    // Use index for faster search
-}
-
-
 export async function fetchProfessorsByCourseId(courseId: string) {
     // Query professor_courses by course_id (hits idx_professor_courses_course)
     // Join with professors table via foreign key
@@ -120,16 +93,3 @@ export async function fetchProfessorsByCourseId(courseId: string) {
         year: prof.year,
     }));
 }
-
-export async function fetchCoursePosts(courseCode: string) {
-    // Get all posts for a course
-    // Use index for faster search
-}
-
-export async function fetchSimilarCourses(courseCode: string) {
-    // Get courses that are similar to a course
-    // Use index for faster search
-    // Last to be implemented after embeddings are done
-    // Array [foundItHard, foundItEasy, similarDifficulty, similarTopic]
-}
-

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import * as rmpService from "../services/rmp-service";
+import * as rmpService from "../services/rmp-service.js";
 
 export async function healthCheck(req: Request, res: Response) {
     res.send("RMP API is running");

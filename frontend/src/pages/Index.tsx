@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -13,8 +13,7 @@ import {
     CourseCardSkeleton,
     RequisiteTreeSkeleton,
     NeededByCardSkeleton,
-    ProfessorCardSkeleton,
-    RedditDiscussionSkeleton
+    ProfessorCardSkeleton
 } from '@/components/skeletons';
 import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/use-course';
 import Footer from '@/components/layout/Footer';
@@ -31,7 +30,8 @@ const Index = () => {
         data: discussionsData,
         fetchNextPage,
         hasNextPage,
-        isFetchingNextPage
+        isFetchingNextPage,
+        isLoading: isDiscussionsLoading
     } = useRedditDiscussions(course?.id ?? null);
 
     const discussions = discussionsData?.pages.flatMap(page => page.discussions) ?? [];
@@ -78,21 +78,20 @@ const Index = () => {
                 </section>
 
                 <section className="mb-10 flex justify-center">
-                    <CourseSearch onSearch={handleSearch} />
+                    <CourseSearch onSearch={handleSearch} placeholder={courseCode || "Search courses (e.g., CMPUT 200)"} />
                 </section>
 
                 {courseCode ? (
                     <div className="animate-fade-in space-y-6">
                         <div className="grid gap-6 lg:grid-cols-12">
                             <aside className="lg:col-span-3">
-                                <Suspense fallback={<RedditDiscussionSkeleton />}>
-                                    <RedditDiscussions
-                                        discussions={discussions}
-                                        fetchNextPage={fetchNextPage}
-                                        hasNextPage={hasNextPage}
-                                        isFetchingNextPage={isFetchingNextPage}
-                                    />
-                                </Suspense>
+                                <RedditDiscussions
+                                    discussions={discussions}
+                                    fetchNextPage={fetchNextPage}
+                                    hasNextPage={hasNextPage}
+                                    isFetchingNextPage={isFetchingNextPage}
+                                    isLoading={isDiscussionsLoading}
+                                />
                             </aside>
 
                             <div className="space-y-6 lg:col-span-9">

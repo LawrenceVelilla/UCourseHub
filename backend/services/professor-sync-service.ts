@@ -8,11 +8,11 @@
  * 6. Link all professors to their courses
  */
 
-import { getProfessor, bulkSaveProfessors } from "./rmp-service";
-import { fetchProfessors } from "../scrapers/prof-catalogue";
-import { syncProfessorsToCourses } from "./professor-course-service";
-import { normalizeDepartment } from "../utils/professor-utils";
-import { FullSyncSummary } from "./types";
+import { getProfessor, bulkSaveProfessors } from "./rmp-service.js";
+import { fetchProfessors } from "../scrapers/prof-catalogue.js";
+import { syncProfessorsToCourses } from "./professor-course-service.js";
+import { normalizeDepartment } from "../utils/professor-utils.js";
+import { FullSyncSummary } from "./types.js";
 
 export async function fullProfessorSync(ualbertaDepartment: string, schoolId: string = "U2Nob29sLTE0MDc=", rmpDepartmentId: string = ""): Promise<FullSyncSummary> {
 

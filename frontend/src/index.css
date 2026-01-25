@@ -224,4 +224,24 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Card height utilities */
+  .card-reddit {
+    height: 36rem;
+  }
+
+  .card-professor {
+    min-height: 15rem;
+    max-height: 17rem;
+  }
+
+  .card-requisite {
+    min-height: 12rem;
+    max-height: 17rem;
+  }
+
+  .card-needed-by {
+    min-height: 12rem;
+    max-height: 17rem;
+  }
 }

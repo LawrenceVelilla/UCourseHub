@@ -7,8 +7,6 @@ const DEPARTMENT_MAPPING: Record<string, string> = {
     'Psychology Dept': 'Psychology'
 };
 
-// Common nickname mappings for professor name matching
-// Maps nicknames to their formal names
 const NICKNAME_MAP: Record<string, string[]> = {
     'elizabeth': ['beth', 'liz', 'lizzy', 'betty', 'eliza'],
     'william': ['bill', 'will', 'willy', 'billy'],
@@ -105,13 +103,13 @@ export function firstNamesMatch(name1: string, name2: string): boolean {
     if (n2.length === 1 && n1.startsWith(n2)) return true;
 
     // Check if one is a nickname of the other
-    // Case 1: n1 is formal, n2 is nickname
+    // n1 is formal, n2 is nickname
     if (NICKNAME_MAP[n1]?.includes(n2)) return true;
 
-    // Case 2: n2 is formal, n1 is nickname
+    // n2 is formal, n1 is nickname
     if (NICKNAME_MAP[n2]?.includes(n1)) return true;
 
-    // Case 3: Both are nicknames of the same formal name
+    // Both are nicknames of the same formal name
     const n1Formals = NICKNAME_TO_FORMAL.get(n1);
     const n2Formals = NICKNAME_TO_FORMAL.get(n2);
     if (n1Formals && n2Formals) {

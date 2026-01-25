@@ -3,10 +3,10 @@
 // Then scrape the professors with the links to their pages using cheerio
 // Then get the courses they are teaching with their corresponding page links using cheerio
 import { Builder, Browser, By, Key, until } from 'selenium-webdriver';
-import chrome from "selenium-webdriver/chrome";
+import chrome from "selenium-webdriver/chrome.js";
 import * as cheerio from "cheerio";
-import { db } from "../config/db/index";
-import { professors } from "../config/db/professors";
+import { db } from "../config/db/index.js";
+import { professors } from "../config/db/professors.js";
 import { eq } from "drizzle-orm";
 
 const validRoles: string[] = [

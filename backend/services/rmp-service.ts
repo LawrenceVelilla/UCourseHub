@@ -1,10 +1,10 @@
 /*
 * This file is responsible for scraping professor data from RateMyProfessor.
 */
-import { db } from "../config/db/index";
-import { professors } from "../config/db/professors";
+import { db } from "../config/db/index.js";
+import { professors } from "../config/db/professors.js";
 import { sql } from "drizzle-orm";
-import { Professor, QueryObject, variables, payload } from "./types";
+import { Professor, QueryObject, variables, payload } from "./types.js";
 
 const RMP_API_URL = "https://www.ratemyprofessors.com/graphql";
 
@@ -12,7 +12,6 @@ function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Mimics the query used by rate my professor
 const query: string = `query TeacherSearchResultsPageQuery(
                   $query: TeacherSearchQuery!
                   $first: Int!

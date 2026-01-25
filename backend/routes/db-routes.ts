@@ -1,7 +1,7 @@
 import express from "express";
-import { getDepartmentProfessors } from "../scrapers/prof-catalogue";
-import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller";
-import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller";
+import { getDepartmentProfessors } from "../scrapers/prof-catalogue.js";
+import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller.js";
+import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller.js";
 
 const router = express.Router();
 

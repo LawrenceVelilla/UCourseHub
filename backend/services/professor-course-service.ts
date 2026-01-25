@@ -1,7 +1,7 @@
-import { db } from "../config/db/index";
-import { professors } from "../config/db/professors";
-import { courses } from "../config/db/courses";
-import { professorCourses } from "../config/db/professor_courses";
+import { db } from "../config/db/index.js";
+import { professors } from "../config/db/professors.js";
+import { courses } from "../config/db/courses.js";
+import { professorCourses } from "../config/db/professor_courses.js";
 import { eq, and, sql, ilike } from "drizzle-orm";
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -9,8 +9,8 @@ import {
     parseNameParts,
     firstNamesMatch,
     extractCourseCode
-} from "../utils/professor-utils";
-import { ProfCourse, ScrapedProfessor, MatchResult, LinkResult, SyncSummary } from "./types";
+} from "../utils/professor-utils.js";
+import { ProfCourse, ScrapedProfessor, MatchResult, LinkResult, SyncSummary } from "./types.js";
 
 
 

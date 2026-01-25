@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { scrapeAndSaveDepartmentCourses } from "../services/course-service";
-import { fetchProfessors } from "../scrapers/prof-catalogue";
-import { fetchPosts } from "../scrapers/reddit";
-import { syncProfessorsToCourses } from "../services/professor-course-service";
-import { fullProfessorSync } from "../services/professor-sync-service";
-import { scrapeRedditForDepartment, scrapeRedditForCourse, scrapeRedditSearchedCourses } from "../services/reddit-service";
+import { scrapeAndSaveDepartmentCourses } from "../services/course-service.js";
+import { fetchProfessors } from "../scrapers/prof-catalogue.js";
+import { fetchPosts } from "../scrapers/reddit.js";
+import { syncProfessorsToCourses } from "../services/professor-course-service.js";
+import { fullProfessorSync } from "../services/professor-sync-service.js";
+import { scrapeRedditForDepartment, scrapeRedditForCourse, scrapeRedditSearchedCourses } from "../services/reddit-service.js";
 
 const router = Router();
 

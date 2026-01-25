@@ -7,13 +7,15 @@ interface RedditDiscussionsProps {
     fetchNextPage?: () => void;
     hasNextPage?: boolean;
     isFetchingNextPage?: boolean;
+    isLoading?: boolean;
 }
 
 const RedditDiscussions = ({
     discussions,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
+    isLoading
 }: RedditDiscussionsProps) => {
     const handleReachBottom = () => {
         if (hasNextPage && !isFetchingNextPage && fetchNextPage) {
@@ -21,7 +23,7 @@ const RedditDiscussions = ({
         }
     };
     return (
-        <Card className="h-[36rem] shadow-earth">
+        <Card className="card-reddit shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <svg
@@ -35,7 +37,11 @@ const RedditDiscussions = ({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {discussions.length > 0 ? (
+                {isLoading ? (
+                    <div className="flex h-full items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                ) : discussions.length > 0 ? (
                     <ScrollableCardContent maxHeight="430px" onReachBottom={handleReachBottom}>
                         <div className="space-y-3">
                             {discussions.map((discussion, idx) => (

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getDiscussionsByCourseId } from "../services/reddit-service";
+import { getDiscussionsByCourseId } from "../services/reddit-service.js";
 
 export async function fetchDiscussionsByCourseId(req: Request, res: Response) {
     const courseId = req.query.courseId as string;

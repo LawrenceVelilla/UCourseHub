@@ -1,12 +1,12 @@
-import { db } from "../config/db/index";
-import { redditPosts, redditComments, redditPostCourses } from "../config/db/reddit";
-import { courses } from "../config/db/courses";
+import { db } from "../config/db/index.js";
+import { redditPosts, redditComments, redditPostCourses } from "../config/db/reddit.js";
+import { courses } from "../config/db/courses.js";
 import { eq, sql } from "drizzle-orm";
 import {
     fetchPostsPaginated, fetchPostComments, extractCourseCodes,
     filterQualityPosts, RedditPost, RedditComment
-} from "../scrapers/reddit";
-import { SavePostResult, ScrapeResult } from "./types";
+} from "../scrapers/reddit.js";
+import { SavePostResult, ScrapeResult } from "./types.js";
 
 
 type TierLevel = 'high' | 'medium' | 'low';

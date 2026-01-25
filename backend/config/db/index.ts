@@ -1,10 +1,10 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import dotenv from "dotenv";
-import * as professors from "./professors";
-import * as courses from "./courses";
-import * as professorCourses from "./professor_courses";
-import * as reddit from "./reddit";
+import * as professors from "./professors.js";
+import * as courses from "./courses.js";
+import * as professorCourses from "./professor_courses.js";
+import * as reddit from "./reddit.js";
 
 dotenv.config();
 

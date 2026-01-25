@@ -1,10 +1,10 @@
 import { OpenAI } from 'openai';
-import { BASE_PROMPT } from '../lib/base-prompt';
-import { scrapeCoursePage } from '../scrapers/course-catalogue';
-import { db } from '../config/db';
-import { courses } from '../config/db/courses';
+import { BASE_PROMPT } from '../lib/base-prompt.js';
+import { scrapeCoursePage } from '../scrapers/course-catalogue.js';
+import { db } from '../config/db/index.js';
+import { courses } from '../config/db/courses.js';
 import { v4 as uuidv4 } from 'uuid';
-import { FinalCourseDetails, RawCourse } from './types';
+import { FinalCourseDetails, RawCourse } from './types.js';
 
 async function descriptionParser(description: string): Promise<any> {
     const prompt = description

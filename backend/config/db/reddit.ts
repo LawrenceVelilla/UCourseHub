@@ -1,5 +1,5 @@
 import { pgTable, text, integer, timestamp, index, primaryKey, uuid } from "drizzle-orm/pg-core";
-import { courses } from "./courses";
+import { courses } from "./courses.js";
 
 export const redditPosts = pgTable('reddit_posts', {
     id: text('id').primaryKey(),

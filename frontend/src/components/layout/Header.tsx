@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { BookOpen, Search, Calculator, Calendar } from 'lucide-react';
+import { Search, Calculator, Calendar } from 'lucide-react';
 import { Logo } from '../ui/logo';
 
 const Header = () => {

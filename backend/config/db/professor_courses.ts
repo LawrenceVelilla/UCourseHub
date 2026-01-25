@@ -1,6 +1,6 @@
 import { pgTable, text, uuid, primaryKey, index, integer } from "drizzle-orm/pg-core";
-import { professors } from "./professors";
-import { courses } from "./courses";
+import { professors } from "./professors.js";
+import { courses } from "./courses.js";
 
 export const professorCourses = pgTable('professor_courses', {
     professorId: text('professor_id').notNull().references(() => professors.id, { onDelete: 'cascade' }),

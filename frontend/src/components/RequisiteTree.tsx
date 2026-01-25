@@ -88,7 +88,7 @@ const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
     const hasRequirements = treeNodes.length > 0;
 
     return (
-        <Card className="shadow-earth">
+        <Card className="card-requisite shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <Icon className="h-5 w-5 text-primary" />

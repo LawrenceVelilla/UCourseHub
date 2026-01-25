@@ -17,7 +17,7 @@ const getRatingColor = (rating: number) => {
 
 const ProfessorCard = ({ professors }: ProfessorCardProps) => {
     return (
-        <Card className="shadow-earth min-h-[15rem] max-h-[17rem]">
+        <Card className="card-professor shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <GraduationCap className="h-5 w-5 text-primary" />
