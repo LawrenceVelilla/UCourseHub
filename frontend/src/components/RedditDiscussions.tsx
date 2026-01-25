@@ -42,7 +42,7 @@ const RedditDiscussions = ({
                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : discussions.length > 0 ? (
-                    <ScrollableCardContent maxHeight="430px" onReachBottom={handleReachBottom}>
+                    <ScrollableCardContent maxHeight="28rem" onReachBottom={handleReachBottom}>
                         <div className="space-y-3">
                             {discussions.map((discussion, idx) => (
                                 <a
