@@ -10,7 +10,7 @@ import { professors } from "../config/db/professors.js";
 import { eq } from "drizzle-orm";
 
 const validRoles: string[] = [
-    "Professor", "Full Lecturer", "Associate Professor", "Associate Lecturer", "ATS Assistant Lecturer", "Full Professor", "Associate Professor", "Assistant Lecturer", "Adjunct Professor", "Assistant Professor", "ATS Full Lecturer", "Science Faculty Lecturer"
+    "Professor", "Full Lecturer", "Associate Professor", "Associate Lecturer", "ATS Assistant Lecturer", "Full Professor", "Associate Professor", "Assistant Lecturer", "Adjunct Professor", "Assistant Professor", "ATS Full Lecturer", "Science Faculty Lecturer", "ATS Associate Lecturer", "Faculty Lecturer", "Asst Chair/Student Services", "Faculty Services Officer"
 ];
 
 

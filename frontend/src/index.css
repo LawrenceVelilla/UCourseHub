@@ -163,6 +163,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
   }
 
   h1,
@@ -229,12 +230,14 @@
   .card-reddit {
     height: 36rem;
     overflow: hidden;
+    max-width: 100%;
   }
 
   .card-professor {
     min-height: 15rem;
     max-height: 17rem;
     overflow: hidden;
+    max-width: 100%;
   }
 
   .card-requisite {
