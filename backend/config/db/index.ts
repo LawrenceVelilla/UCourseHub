@@ -14,13 +14,12 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 10,
+    max: 20,
     min: 1,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 });
 
-// Handle pool errors to prevent app crash on unexpected disconnections
 pool.on("error", (err) => {
     console.error("Unexpected database pool error:", err.message);
 });

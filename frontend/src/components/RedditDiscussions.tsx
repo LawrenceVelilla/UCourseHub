@@ -52,8 +52,8 @@ const RedditDiscussions = ({
                                     rel="noopener noreferrer"
                                     className="group block rounded-lg border border-border bg-muted/30 p-3 transition-all hover:border-primary/30 hover:bg-muted"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <h4 className="font-medium text-foreground group-hover:text-primary">
+                                    <div className="flex items-start justify-between gap-2 min-w-0">
+                                        <h4 className="font-medium text-foreground group-hover:text-primary min-w-0 break-words">
                                             {discussion.title}
                                         </h4>
                                         <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
