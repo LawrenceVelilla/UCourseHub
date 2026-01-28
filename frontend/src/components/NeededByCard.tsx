@@ -65,7 +65,7 @@ const NeededByCard = ({ prereqDependents, coreqDependents }: NeededByCardProps) 
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <ScrollableCardContent>
+                <ScrollableCardContent maxHeight="18rem" minHeight="5rem" showBlur>
                     {hasAnyDependents ? (
                         <div className="space-y-4">
                             <DependentList

@@ -11,6 +11,10 @@ A web application for searching University of Alberta courses with integrated pr
 
 ## Installation
 
+```bash
+git clone https://github.com/LawrenceVelilla/UCourseHub.git
+```
+
 ### Backend
 
 ```bash
@@ -62,7 +66,7 @@ The backend server runs on port 3000 and the frontend on port 5173.
 
 ### Public Routes
 
-#### Course Data
+#### Course Data (Fetching logic)
 - `GET /api/course?courseCode=<courseCode>` - Get course details
 - `GET /api/dependents?courseCode=<courseCode>` - Get course dependents
 - `GET /api/?department=<department>` - Get department professors
@@ -71,11 +75,11 @@ The backend server runs on port 3000 and the frontend on port 5173.
 
 ### Admin Routes
 
-#### RateMyProfessor
+#### RateMyProfessor (To be moved to a different folder when I start working on the recommendation systme since this is mostly offline and doesnt need to be handled by the backend server)
 - `GET /api/admin/rmp/` - Health check
 - `POST /api/admin/rmp/` - Fetch professors from RateMyProfessor
 
-#### Scrapers
+#### Scrapers (To be moved to a different folder when I start working on the recommendation systme since this is mostly offline and doesnt need to be handled by the backend server)
 - `GET /api/admin/scraper/prof-scraper?department=<department>` - Scrape professors from the Professor catalogue
 - `GET /api/admin/scraper/course-scraper?department=<department>&from=<from>&to=<to>` - Scrape courses
 - `GET /api/admin/scraper/reddit-scraper?courseCode=<courseCode>&limit=<limit>` - Scrape Reddit posts
@@ -90,5 +94,8 @@ The backend server runs on port 3000 and the frontend on port 5173.
 - Add suggestions/recommendations for courses based on the course searched
     - Say we are searching CMPUT 291, we could add a section that says "If you found this course hard, you might also find these courses hard: ... "
     - Make sure to keep context (e.g. both CMPUT 291 and NURS 223 are hard, but wont recommend each other since they are in different departments and they are not prereqs/coreqs of each other)
+- Although we have the caching provided by TanstackQuery, we should add a Redis cache to the backend to reduce database load and improve concurrent user support.
 
 
+
+### If you have any cool ideas you think would be cool to add, feel free to make a pull request or let me know and lets collaborate!

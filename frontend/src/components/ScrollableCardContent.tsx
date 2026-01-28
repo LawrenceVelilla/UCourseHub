@@ -1,13 +1,18 @@
 import { useRef, useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { ProgressiveBlur } from './ui/progressive-blur';
 
 interface ScrollableCardContentProps {
     children: React.ReactNode;
+    minHeight?: string;
     maxHeight?: string;
     onReachBottom?: () => void;
+    fillParent?: boolean;
+    showBlur?: boolean;
+    blurHeight?: string;
 }
 
-const ScrollableCardContent = ({ children, maxHeight = '280px', onReachBottom }: ScrollableCardContentProps) => {
+const ScrollableCardContent = ({ children, minHeight = '28rem', maxHeight = '28rem', onReachBottom, fillParent = false, showBlur = false, blurHeight = '20%' }: ScrollableCardContentProps) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [hasOverflow, setHasOverflow] = useState(false);
     const [isAtBottom, setIsAtBottom] = useState(false);
@@ -47,7 +52,7 @@ const ScrollableCardContent = ({ children, maxHeight = '280px', onReachBottom }:
     };
 
     return (
-        <div className="relative animate-fade-in">
+        <div className={`relative animate-fade-in ${fillParent ? 'flex-1 flex flex-col min-h-0' : ''}`}>
             {hasOverflow && !isAtBottom && (
                 <button
                     onClick={scrollToBottom}
@@ -59,11 +64,14 @@ const ScrollableCardContent = ({ children, maxHeight = '280px', onReachBottom }:
             <div
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="scrollbar-hide overflow-y-auto"
-                style={{ maxHeight }}
+                className={`scrollbar-hide overflow-y-auto ${fillParent ? 'flex-1' : ''}`}
+                style={fillParent ? undefined : { minHeight, maxHeight }}
             >
                 {children}
             </div>
+            {showBlur && hasOverflow && !isAtBottom && (
+                <ProgressiveBlur position="bottom" height={blurHeight} />
+            )}
         </div>
     );
 };
