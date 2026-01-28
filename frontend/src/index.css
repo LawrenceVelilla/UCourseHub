@@ -228,14 +228,14 @@
 
   /* Card height utilities */
   .card-reddit {
-    height: 36rem;
+    min-height: 37rem;
+    max-height: 43rem;
     overflow: hidden;
     max-width: 100%;
   }
 
   .card-professor {
-    min-height: 15rem;
-    max-height: 17rem;
+    max-height: 22rem;
     overflow: hidden;
     max-width: 100%;
   }

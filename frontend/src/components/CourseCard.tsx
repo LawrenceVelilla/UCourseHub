@@ -47,7 +47,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
                     </div>
                 )}
 
-                <p className="text-sm leading-relaxed text-foreground/80">
+                <p className="text-sm leading-relaxed text-foreground/80 min-h-[7rem] line-clamp-5">
                     {course.description}
                 </p>
 

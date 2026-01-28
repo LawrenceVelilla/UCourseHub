@@ -4,7 +4,7 @@ import ScrollableCardContent from '../ScrollableCardContent';
 
 const ProfessorCardSkeleton = () => {
     return (
-        <Card className="card-professor shadow-earth">
+        <Card className="card-professor shadow-earth gap-2">
             <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5" />

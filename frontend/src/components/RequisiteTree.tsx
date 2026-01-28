@@ -42,7 +42,7 @@ const TreeNodeRenderer = ({ node, depth = 0, onCourseClick }: TreeNodeRendererPr
 
     if (node.type === 'course' && node.courseCode) {
         return (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${depth > 0 ? 'ml-4 border-l-2 border-border pl-4' : ''}`}>
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 <Badge
                     variant="outline"
@@ -57,7 +57,7 @@ const TreeNodeRenderer = ({ node, depth = 0, onCourseClick }: TreeNodeRendererPr
 
     if (node.type === 'wildcard') {
         return (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${depth > 0 ? 'ml-4 border-l-2 border-border pl-4' : ''}`}>
                 <Sparkles className="h-3 w-3 text-amber-500" />
                 <Badge
                     variant="outline"
@@ -96,7 +96,7 @@ const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <ScrollableCardContent>
+                <ScrollableCardContent minHeight="5rem" maxHeight="18rem" showBlur>
                     {hasRequirements ? (
                         <div className="space-y-2">
                             {treeNodes.map((node) => (

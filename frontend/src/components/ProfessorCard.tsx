@@ -20,7 +20,7 @@ const getDifficultyColor = (difficulty: number) => {
 
 const ProfessorCard = ({ professors }: ProfessorCardProps) => {
     return (
-        <Card className="card-professor shadow-earth">
+        <Card className="card-professor shadow-earth gap-2">
             <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <GraduationCap className="h-5 w-5 text-primary" />
@@ -40,18 +40,16 @@ const ProfessorCard = ({ professors }: ProfessorCardProps) => {
                     </div>
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1">
-                <ScrollableCardContent maxHeight="100px">
+            <CardContent>
+                <ScrollableCardContent minHeight="140px" maxHeight="240px">
                     {professors.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {professors.map((prof) => {
                                 const content = (
                                     <>
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                                                <GraduationCap className="h-5 w-5 text-primary" />
-                                            </div>
-                                            <div className="min-w-0">
+
+                                            <div className="min-w-0 pl-5">
                                                 <p className="font-medium text-foreground group-hover:text-primary truncate">
                                                     {prof.name}
                                                 </p>
@@ -113,6 +111,9 @@ const ProfessorCard = ({ professors }: ProfessorCardProps) => {
                         </p>
                     )}
                 </ScrollableCardContent>
+                <section className='text-xs italic text-muted-foreground mt-2'>
+                    Disclaimer: Take these scores with a grain of salt. Student experience varies depending on the the student and semester! A lower score does not necessarily mean a bad professor.
+                </section>
             </CardContent>
         </Card>
     );

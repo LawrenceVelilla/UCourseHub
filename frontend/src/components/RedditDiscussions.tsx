@@ -23,8 +23,8 @@ const RedditDiscussions = ({
         }
     };
     return (
-        <Card className="card-reddit shadow-earth">
-            <CardHeader className="pb-3">
+        <Card className="card-reddit shadow-earth w-full flex flex-col">
+            <CardHeader className="pb-3 shrink-0">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                     <svg
                         className="h-5 w-5 text-primary"
@@ -36,13 +36,13 @@ const RedditDiscussions = ({
                     Reddit Discussions
                 </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col min-h-0">
                 {isLoading ? (
-                    <div className="flex h-full items-center justify-center">
+                    <div className="flex flex-1 items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : discussions.length > 0 ? (
-                    <ScrollableCardContent maxHeight="28rem" onReachBottom={handleReachBottom}>
+                    <ScrollableCardContent maxHeight="35rem" minHeight="28rem" onReachBottom={handleReachBottom} showBlur>
                         <div className="space-y-3">
                             {discussions.map((discussion, idx) => (
                                 <a
@@ -81,9 +81,13 @@ const RedditDiscussions = ({
                         </div>
                     </ScrollableCardContent>
                 ) : (
-                    <p className="text-sm italic text-muted-foreground">
-                        No discussions found for this course
-                    </p>
+                    <ScrollableCardContent maxHeight="28rem" minHeight="28rem">
+                        <div>
+                            <p className="text-sm italic text-muted-foreground">
+                                No discussions found for this course
+                            </p>
+                        </div>
+                    </ScrollableCardContent>
                 )}
             </CardContent>
         </Card>
