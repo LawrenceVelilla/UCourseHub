@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
