@@ -1,5 +1,7 @@
 import express from "express";
-import { getDepartmentProfessors } from "../scrapers/prof-catalogue.js";
+import { db } from "../config/db/index.js";
+import { professors } from "../config/db/professors.js";
+import { eq } from "drizzle-orm";
 import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller.js";
 import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller.js";
 
@@ -13,8 +15,8 @@ router.get("/", async (req, res) => {
     }
 
     try {
-        const professors = await getDepartmentProfessors(department);
-        res.json(professors);
+        const profs = await db.select().from(professors).where(eq(professors.department, department));
+        res.json(profs);
     } catch (error) {
         console.error("Error fetching professors:", error);
         res.status(500).json({ error: "Failed to fetch professors" });
@@ -63,8 +65,8 @@ router.get("/professors", async (req, res) => {
     }
 
     try {
-        const professors = await fetchProfessorsByCourseId(courseId);
-        res.json(professors);
+        const profs = await fetchProfessorsByCourseId(courseId);
+        res.json(profs);
     } catch (error) {
         console.error("Error fetching professors:", error);
         res.status(500).json({ error: "Failed to fetch professors" });

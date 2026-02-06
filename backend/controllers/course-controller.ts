@@ -1,4 +1,4 @@
-import { db, query } from "../config/db/index.js";
+import { db } from "../config/db/index.js";
 import { courses } from "../config/db/courses.js";
 import { professors } from "../config/db/professors.js";
 import { professorCourses } from "../config/db/professor_courses.js";

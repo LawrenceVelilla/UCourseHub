@@ -1,28 +1,19 @@
 import { OpenAI } from 'openai';
-import { BASE_PROMPT } from '../lib/base-prompt.js';
-import { scrapeCoursePage } from '../scrapers/course-catalogue.js';
-import { db } from '../config/db/index.js';
-import { courses } from '../config/db/courses.js';
+import { BASE_PROMPT } from './base-prompt.js';
+import { db } from '../db/config.js';
+import { courses } from '../db/courses.js';
 import { v4 as uuidv4 } from 'uuid';
 import { FinalCourseDetails, RawCourse } from './types.js';
+import { scrapeCoursePage } from '../scrapers/course-catalogue.js';
 
 async function descriptionParser(description: string): Promise<any> {
-    const prompt = description
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
-            {
-                role: 'user',
-                content: prompt,
-            },
-            {
-                role: 'system',
-                content: BASE_PROMPT
-            },
+            { role: 'user', content: description },
+            { role: 'system', content: BASE_PROMPT }
         ],
         temperature: 0,
         response_format: { type: 'json_object' },
@@ -31,63 +22,46 @@ async function descriptionParser(description: string): Promise<any> {
     const result = response.choices[0].message.content;
 
     try {
-        if (result === null) {
-            console.error('Null result');
-            return null;
-        }
-
-        const parsedResult = JSON.parse(result);
-
-        if (typeof parsedResult === 'object' && parsedResult !== null) {
-            return parsedResult;
-        } else {
-            console.error('Parsed result is not a valid JSON object:', parsedResult);
-            return null;
-        }
-    } catch (error) {
-        console.error('Error parsing JSON:', error);
+        if (!result) return null;
+        const parsed = JSON.parse(result);
+        return typeof parsed === 'object' && parsed !== null ? parsed : null;
+    } catch {
+        console.error('Error parsing JSON');
         return null;
     }
 }
 
-export async function processCourse(rawCourse: RawCourse): Promise<any> {
-    const courseToBeParsed = rawCourse;
-    console.log("parsing course: " + courseToBeParsed.courseCode);
-    const parsed = await descriptionParser(courseToBeParsed.description);
-    console.log("parsed: ", parsed);
-    if (parsed === null) {
-        return null;
-    }
+export async function processCourse(rawCourse: RawCourse): Promise<FinalCourseDetails | null> {
+    console.log("parsing course: " + rawCourse.courseCode);
+    const parsed = await descriptionParser(rawCourse.description);
 
-    const finalDetails = {
-        department: courseToBeParsed.department,
-        courseCode: courseToBeParsed.courseCode,
-        description: courseToBeParsed.description,
-        title: courseToBeParsed.title,
+    if (!parsed) return null;
+
+    return {
+        department: rawCourse.department,
+        courseCode: rawCourse.courseCode,
+        description: rawCourse.description,
+        title: rawCourse.title,
         keywords: parsed.keywords,
-        units: courseToBeParsed.units,
+        units: rawCourse.units,
         requirements: parsed.requirements,
         flattenedPrerequisites: parsed.flattenedPrerequisites || [],
         flattenedCorequisites: parsed.flattenedCorequisites || [],
-        url: courseToBeParsed.url || null,
+        url: rawCourse.url || null,
         updatedAt: new Date().toISOString(),
-    } as FinalCourseDetails;
-    return finalDetails;
+    };
 }
 
-export async function processDepartment(
-    rawCourses: RawCourse[]
-): Promise<FinalCourseDetails[]> {
-    let processedCourses: FinalCourseDetails[] = [];
+export async function processDepartment(rawCourses: RawCourse[]): Promise<FinalCourseDetails[]> {
+    const processed: FinalCourseDetails[] = [];
 
     for (const course of rawCourses) {
         const parsed = await processCourse(course);
-        if (parsed === null) {
-            return [];
-        }
-        processedCourses.push(parsed);
+        if (!parsed) return [];
+        processed.push(parsed);
     }
-    return processedCourses;
+
+    return processed;
 }
 
 export async function saveCourse(courseDetails: FinalCourseDetails): Promise<void> {
@@ -120,9 +94,9 @@ export async function saveCourse(courseDetails: FinalCourseDetails): Promise<voi
                 updatedAt: new Date(),
             }
         });
-        console.log(`Saved course: ${courseDetails.department} ${courseDetails.courseCode}`);
+        console.log(`Saved course: ${courseDetails.courseCode}`);
     } catch (error) {
-        console.error(`Error saving course ${courseDetails.department} ${courseDetails.courseCode}:`, error);
+        console.error(`Error saving course ${courseDetails.courseCode}:`, error);
         throw error;
     }
 }
@@ -139,12 +113,12 @@ export async function scrapeDepartmentCourses(departmentCode: string, from: numb
 
     rawCourses = rawCourses.slice(from, to === -1 ? rawCourses.length : to);
     console.log(`Found ${rawCourses.length} courses for ${departmentCode}`);
-    const processedCourses = await processDepartment(rawCourses);
-    return processedCourses;
+
+    return processDepartment(rawCourses);
 }
 
 export async function scrapeAndSaveDepartmentCourses(departmentCode: string, from: number = 0, to: number = -1): Promise<number> {
-    let processedCourses = await scrapeDepartmentCourses(departmentCode, from, to);
+    const processedCourses = await scrapeDepartmentCourses(departmentCode, from, to);
 
     let savedCount = 0;
     for (const course of processedCourses) {
@@ -152,8 +126,9 @@ export async function scrapeAndSaveDepartmentCourses(departmentCode: string, fro
             await saveCourse(course);
             savedCount++;
         } catch (error) {
-            console.error(`Failed to save course ${course.department} ${course.courseCode}`);
+            console.error(`Failed to save course ${course.courseCode}`);
         }
     }
+
     return savedCount;
 }

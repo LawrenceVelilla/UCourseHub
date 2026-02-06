@@ -1,36 +1,21 @@
-
-/*
-
-Scraping file that will get teh data and eventually feed it to a parser.
-Gathers raw information from the course page
-
-*/
-
 import * as cheerio from 'cheerio';
-import axios from 'axios';
-import fs from 'fs';
+import { RawCourse } from '../services/types.js';
 
-// TODO: Add rate limiting
-
-// The .course class used to identify each course block is causing 
-// issues with the scraper as UofA has a duplicate course class for the same course
-// IF the course is set to be updated during the date given
-
-export async function scrapeCoursePage(url) {
+export async function scrapeCoursePage(url: string): Promise<RawCourse[] | null> {
     try {
-        const response = await axios.get(url);
-        const $ = cheerio.load(response.data);
+        const response = await fetch(url);
+        const html = await response.text();
+        const $ = cheerio.load(html);
 
-        const courses = [];
+        const courses: RawCourse[] = [];
+
         $('.course').each((_, element) => {
             const $course = $(element);
 
             const headerText = $course.find('h2 a').text().trim();
             const courseUrl = $course.find('h2 a').attr('href');
 
-            const title = headerText.match(
-                /^([A-Z]+(?:\s[A-Z]+)?\s+\d+)\s*[-–—]?\s*(.*)/
-            );
+            const title = headerText.match(/^([A-Z]+(?:\s[A-Z]+)?\s+\d+)\s*[-–—]?\s*(.*)/);
             let courseCode = title ? title[1] : '';
             let coursetitle = title ? title[2] : headerText;
 
@@ -40,18 +25,14 @@ export async function scrapeCoursePage(url) {
                 coursetitle = section[2].trim();
             }
 
-            // Extract department - handle multi-word departments like INT D
             let department = '';
             const deptMatch = courseCode.match(/^([A-Z]+(?:\s[A-Z]+)?)/);
             if (deptMatch) {
                 department = deptMatch[1];
             }
 
-            // Extract units
             const unitsText = $course.find('b').text().trim();
-            const unitsMatch = unitsText.match(
-                /(\d+)\s+units\s+\(fi\s+(\d+)\)\s*\(([^)]+)\)/
-            );
+            const unitsMatch = unitsText.match(/(\d+)\s+units\s+\(fi\s+(\d+)\)\s*\(([^)]+)\)/);
             const units = {
                 credits: unitsMatch ? parseInt(unitsMatch[1]) : null,
                 feeIndex: unitsMatch ? parseInt(unitsMatch[2]) : null,
@@ -74,6 +55,7 @@ export async function scrapeCoursePage(url) {
 
         return courses;
     } catch (error) {
+        console.error('Error scraping course page:', error);
         return null;
     }
 }
