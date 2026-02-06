@@ -31,8 +31,8 @@ async function descriptionParser(description: string): Promise<any> {
     }
 }
 
-export async function processCourse(rawCourse: RawCourse): Promise<FinalCourseDetails | null> {
-    console.log("parsing course: " + rawCourse.courseCode);
+export async function processCourse(rawCourse: RawCourse, onProgress?: (msg: string) => void): Promise<FinalCourseDetails | null> {
+    onProgress?.(`Parsing ${rawCourse.courseCode}...`);
     const parsed = await descriptionParser(rawCourse.description);
 
     if (!parsed) return null;
@@ -52,11 +52,11 @@ export async function processCourse(rawCourse: RawCourse): Promise<FinalCourseDe
     };
 }
 
-export async function processDepartment(rawCourses: RawCourse[]): Promise<FinalCourseDetails[]> {
+export async function processDepartment(rawCourses: RawCourse[], onProgress?: (msg: string) => void): Promise<FinalCourseDetails[]> {
     const processed: FinalCourseDetails[] = [];
 
     for (const course of rawCourses) {
-        const parsed = await processCourse(course);
+        const parsed = await processCourse(course, onProgress);
         if (!parsed) return [];
         processed.push(parsed);
     }
@@ -65,11 +65,23 @@ export async function processDepartment(rawCourses: RawCourse[]): Promise<FinalC
 }
 
 export async function saveCourse(courseDetails: FinalCourseDetails): Promise<void> {
-    try {
-        await db.insert(courses).values({
-            id: uuidv4(),
-            department: courseDetails.department,
-            courseCode: courseDetails.courseCode,
+    await db.insert(courses).values({
+        id: uuidv4(),
+        department: courseDetails.department,
+        courseCode: courseDetails.courseCode,
+        title: courseDetails.title,
+        description: courseDetails.description,
+        units: courseDetails.units,
+        keywords: courseDetails.keywords,
+        requirements: courseDetails.requirements,
+        flattenedPrerequisites: courseDetails.flattenedPrerequisites,
+        flattenedCorequisites: courseDetails.flattenedCorequisites,
+        url: courseDetails.url,
+        updatedAt: new Date(),
+        search_vector: undefined,
+    }).onConflictDoUpdate({
+        target: [courses.courseCode],
+        set: {
             title: courseDetails.title,
             description: courseDetails.description,
             units: courseDetails.units,
@@ -79,54 +91,46 @@ export async function saveCourse(courseDetails: FinalCourseDetails): Promise<voi
             flattenedCorequisites: courseDetails.flattenedCorequisites,
             url: courseDetails.url,
             updatedAt: new Date(),
-            search_vector: undefined,
-        }).onConflictDoUpdate({
-            target: [courses.courseCode],
-            set: {
-                title: courseDetails.title,
-                description: courseDetails.description,
-                units: courseDetails.units,
-                keywords: courseDetails.keywords,
-                requirements: courseDetails.requirements,
-                flattenedPrerequisites: courseDetails.flattenedPrerequisites,
-                flattenedCorequisites: courseDetails.flattenedCorequisites,
-                url: courseDetails.url,
-                updatedAt: new Date(),
-            }
-        });
-        console.log(`Saved course: ${courseDetails.courseCode}`);
-    } catch (error) {
-        console.error(`Error saving course ${courseDetails.courseCode}:`, error);
-        throw error;
-    }
+        }
+    });
 }
 
-export async function scrapeDepartmentCourses(departmentCode: string, from: number = 0, to: number = -1): Promise<FinalCourseDetails[]> {
+export async function scrapeDepartmentCourses(
+    departmentCode: string,
+    from: number = 0,
+    to: number = -1,
+    onProgress?: (msg: string) => void
+): Promise<FinalCourseDetails[]> {
     const url = `https://apps.ualberta.ca/catalogue/course/${departmentCode}`;
-    console.log(`Scraping courses from: ${url}`);
+    onProgress?.(`Fetching course list for ${departmentCode}...`);
 
     let rawCourses = await scrapeCoursePage(url);
     if (!rawCourses || rawCourses.length === 0) {
-        console.log(`No courses found for department: ${departmentCode}`);
         return [];
     }
 
     rawCourses = rawCourses.slice(from, to === -1 ? rawCourses.length : to);
-    console.log(`Found ${rawCourses.length} courses for ${departmentCode}`);
+    onProgress?.(`Found ${rawCourses.length} courses, processing...`);
 
-    return processDepartment(rawCourses);
+    return processDepartment(rawCourses, onProgress);
 }
 
-export async function scrapeAndSaveDepartmentCourses(departmentCode: string, from: number = 0, to: number = -1): Promise<number> {
-    const processedCourses = await scrapeDepartmentCourses(departmentCode, from, to);
+export async function scrapeAndSaveDepartmentCourses(
+    departmentCode: string,
+    from: number = 0,
+    to: number = -1,
+    onProgress?: (msg: string) => void
+): Promise<number> {
+    const processedCourses = await scrapeDepartmentCourses(departmentCode, from, to, onProgress);
 
     let savedCount = 0;
     for (const course of processedCourses) {
         try {
+            onProgress?.(`Saving ${course.courseCode}...`);
             await saveCourse(course);
             savedCount++;
         } catch (error) {
-            console.error(`Failed to save course ${course.courseCode}`);
+            // Silent fail, count not incremented
         }
     }
 
