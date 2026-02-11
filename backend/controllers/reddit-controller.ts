@@ -4,7 +4,7 @@ import { redditPosts, redditPostCourses } from "../config/db/reddit.js";
 import { eq, sql } from "drizzle-orm";
 
 export async function fetchDiscussionsByCourseId(req: Request, res: Response) {
-    const courseId = req.query.courseId as string;
+    const courseId = req.params.courseId as string;
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = parseInt(req.query.offset as string) || 0;
 

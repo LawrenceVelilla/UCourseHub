@@ -23,8 +23,8 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/course", async (req, res) => {
-    const courseCode = req.query.courseCode as string;
+router.get("/course/:courseCode", async (req, res) => {
+    const courseCode = req.params.courseCode as string;
 
     if (!courseCode) {
         return res.status(400).json({ error: "Course code parameter is required" });
@@ -39,8 +39,8 @@ router.get("/course", async (req, res) => {
     }
 });
 
-router.get("/dependents", async (req, res) => {
-    const courseCode = req.query.courseCode as string;
+router.get("/dependents/:courseCode", async (req, res) => {
+    const courseCode = req.params.courseCode as string;
 
     if (!courseCode) {
         return res.status(400).json({ error: "Course code parameter is required" });
@@ -55,10 +55,10 @@ router.get("/dependents", async (req, res) => {
     }
 });
 
-router.get("/reddit/discussions", fetchDiscussionsByCourseId);
+router.get("/reddit/discussions/:courseId", fetchDiscussionsByCourseId);
 
-router.get("/professors", async (req, res) => {
-    const courseId = req.query.courseId as string;
+router.get("/professors/:courseId", async (req, res) => {
+    const courseId = req.params.courseId as string;
 
     if (!courseId) {
         return res.status(400).json({ error: "courseId parameter is required" });

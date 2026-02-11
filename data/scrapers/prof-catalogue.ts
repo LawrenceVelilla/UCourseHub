@@ -10,7 +10,8 @@ const validRoles: string[] = [
     "ATS Assistant Lecturer", "Full Professor", "Assistant Lecturer",
     "Adjunct Professor", "Assistant Professor", "ATS Full Lecturer",
     "Science Faculty Lecturer", "ATS Associate Lecturer", "Faculty Lecturer",
-    "Asst Chair/Student Services", "Faculty Services Officer"
+    "Asst Chair/Student Services", "Faculty Services Officer", "Academic Teaching Staff",
+    "Academic Teaching Staff - Instructor - Lecturer", "Assistant Teaching Professor"
 ];
 
 interface ProfCourse {

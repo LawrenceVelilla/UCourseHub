@@ -50,10 +50,10 @@ async function main() {
                     break;
             }
         } catch (error) {
-            console.error(chalk.red('\n❌ Error:'), error instanceof Error ? error.message : error);
+            console.error(chalk.red('\nError:'), error instanceof Error ? error.message : error);
         }
 
-        console.log(''); // spacing
+        console.log('');
     }
 }
 
@@ -82,7 +82,7 @@ async function handleCourses() {
         const count = await scrapeAndSaveDepartmentCourses(department, from, to, (msg) => {
             spinner.text = msg;
         });
-        spinner.succeed(chalk.green(`✓ Saved ${count} courses for ${department}`));
+        spinner.succeed(chalk.green(`Saved ${count} courses for ${department}`));
     } catch (error) {
         spinner.fail(chalk.red('Failed to scrape courses'));
         throw error;
@@ -108,7 +108,7 @@ async function handleProfessors() {
                 value: 'rmp-only',
                 description: 'Only scrapes and saves RateMyProfessors data'
             },
-            { name: chalk.gray('← Back'), value: 'back' },
+            { name: chalk.gray('Back'), value: 'back' },
         ],
     });
 
@@ -136,7 +136,7 @@ async function handleProfessors() {
             const summary = await fullProfessorSync(department, schoolId, rmpDeptId);
             spinner.succeed(chalk.green('Full sync completed!'));
 
-            console.log(chalk.cyan('\n📊 Summary:'));
+            console.log(chalk.cyan('\nSummary:'));
             console.log(`   RMP Scraped: ${summary.rmpScraped}`);
             console.log(`   RMP Saved: ${summary.rmpSaved}`);
             console.log(`   UAlberta Scraped: ${summary.ualbertaScraped}`);
@@ -218,7 +218,7 @@ async function handleReddit() {
                 value: 'course-text',
                 description: 'Searches for posts mentioning course code anywhere'
             },
-            { name: chalk.gray('← Back'), value: 'back' },
+            { name: chalk.gray('Back'), value: 'back' },
         ],
     });
 
@@ -270,7 +270,7 @@ async function handleReddit() {
             const result = await scrapeRedditForCourse(courseCode, maxPages);
             spinner.succeed(chalk.green('Reddit scrape completed!'));
 
-            console.log(chalk.cyan('\n📊 Summary:'));
+            console.log(chalk.cyan('\nSummary:'));
             console.log(`   Posts Scraped: ${result.postsScraped}`);
             console.log(`   New Posts: ${result.postsNew}`);
             console.log(`   Posts Saved: ${result.postsSaved}`);
