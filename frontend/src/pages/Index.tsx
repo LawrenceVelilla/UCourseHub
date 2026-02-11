@@ -82,8 +82,8 @@ const Index = () => {
 
                 {courseCode ? (
                     <div className="animate-fade-in space-y-6">
-                        <div className="grid gap-6 lg:grid-cols-12 items-stretch">
-                            <aside className="lg:col-span-3 flex">
+                        <div className="grid gap-6 lg:grid-cols-12 items-stretch overflow-hidden">
+                            <aside className="lg:col-span-3 flex min-w-0">
                                 <RedditDiscussions
                                     discussions={discussions}
                                     fetchNextPage={fetchNextPage}
@@ -93,7 +93,7 @@ const Index = () => {
                                 />
                             </aside>
 
-                            <div className="space-y-7 lg:col-span-9">
+                            <div className="space-y-7 lg:col-span-9 min-w-0">
                                 {isCourseLoading ? (
                                     <>
                                         <CourseCardSkeleton />
@@ -116,7 +116,7 @@ const Index = () => {
                             </div>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-3">
+                        <div className="grid gap-6 md:grid-cols-3 overflow-hidden">
                             {isLoading ? (
                                 <>
                                     <RequisiteTreeSkeleton />

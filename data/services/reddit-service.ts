@@ -1,13 +1,12 @@
-import { db } from "../config/db/index.js";
-import { redditPosts, redditComments, redditPostCourses } from "../config/db/reddit.js";
-import { courses } from "../config/db/courses.js";
+import { db } from "../db/config.js";
+import { redditPosts, redditComments, redditPostCourses } from "../db/reddit.js";
+import { courses } from "../db/courses.js";
 import { eq, sql } from "drizzle-orm";
 import {
     fetchPostsPaginated, fetchPostComments, extractCourseCodes,
     filterQualityPosts, RedditPost, RedditComment
 } from "../scrapers/reddit.js";
 import { SavePostResult, ScrapeResult } from "./types.js";
-
 
 type TierLevel = 'high' | 'medium' | 'low';
 
@@ -30,17 +29,13 @@ function getTier(department: string): TierLevel {
     return 'low';
 }
 
-/**
- * Save a Reddit post to the database
- */
-async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<SavePostResult> {
-    const result: SavePostResult = {
-        postId: post.id,
-        isNew: false,
-        coursesLinked: 0,
-    };
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    // Check if post already exists
+async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<SavePostResult> {
+    const result: SavePostResult = { postId: post.id, isNew: false, coursesLinked: 0 };
+
     const existing = await db
         .select({ id: redditPosts.id })
         .from(redditPosts)
@@ -48,16 +43,10 @@ async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<S
         .limit(1);
 
     if (existing.length > 0) {
-        // Update existing post
         await db.update(redditPosts)
-            .set({
-                score: post.score,
-                numComments: post.num_comments,
-                mentionedCourses,
-            })
+            .set({ score: post.score, numComments: post.num_comments, mentionedCourses })
             .where(eq(redditPosts.id, post.id));
     } else {
-        // Insert new post
         await db.insert(redditPosts).values({
             id: post.id,
             title: post.title,
@@ -71,7 +60,6 @@ async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<S
         result.isNew = true;
     }
 
-    // Link to courses
     for (const courseCode of mentionedCourses) {
         const course = await db
             .select({ id: courses.id })
@@ -81,10 +69,7 @@ async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<S
 
         if (course.length > 0) {
             await db.insert(redditPostCourses)
-                .values({
-                    postId: post.id,
-                    courseId: course[0].id,
-                })
+                .values({ postId: post.id, courseId: course[0].id })
                 .onConflictDoNothing();
             result.coursesLinked++;
         }
@@ -93,12 +78,8 @@ async function savePost(post: RedditPost, mentionedCourses: string[]): Promise<S
     return result;
 }
 
-/**
- * Save comments for a post
- */
 async function saveComments(postId: string, comments: RedditComment[]): Promise<number> {
     let saved = 0;
-
     for (const comment of comments) {
         await db.insert(redditComments)
             .values({
@@ -113,31 +94,17 @@ async function saveComments(postId: string, comments: RedditComment[]): Promise<
             .onConflictDoNothing();
         saved++;
     }
-
     return saved;
 }
 
-function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
- * Scrape Reddit for a specific department
- */
 export async function scrapeRedditForDepartment(department: string): Promise<ScrapeResult> {
     const tier = getTier(department);
     const config = TIER_CONFIG[tier];
-
     console.log(`Scraping Reddit for ${department} (tier: ${tier}, pages: ${config.pages})`);
 
     const result: ScrapeResult = {
-        query: department,
-        postsScraped: 0,
-        postsNew: 0,
-        postsSaved: 0,
-        commentsSaved: 0,
-        coursesLinked: 0,
-        errors: [],
+        query: department, postsScraped: 0, postsNew: 0,
+        postsSaved: 0, commentsSaved: 0, coursesLinked: 0, errors: []
     };
 
     try {
@@ -151,27 +118,23 @@ export async function scrapeRedditForDepartment(department: string): Promise<Scr
             try {
                 const text = `${post.title} ${post.selftext}`;
                 const courseCodes = extractCourseCodes(text);
-
                 const saveResult = await savePost(post, courseCodes);
+
                 result.postsSaved++;
                 if (saveResult.isNew) result.postsNew++;
                 result.coursesLinked += saveResult.coursesLinked;
+
                 if (post.num_comments > 0) {
                     const comments = await fetchPostComments(post.id, 50);
-                    const commentsSaved = await saveComments(post.id, comments);
-                    result.commentsSaved += commentsSaved;
-                    await sleep(500); // Rate limit
+                    result.commentsSaved += await saveComments(post.id, comments);
+                    await sleep(500);
                 }
-
             } catch (error) {
-                const msg = error instanceof Error ? error.message : 'Unknown error';
-                result.errors.push(`Post ${post.id}: ${msg}`);
+                result.errors.push(`Post ${post.id}: ${error instanceof Error ? error.message : 'Unknown'}`);
             }
         }
-
     } catch (error) {
-        const msg = error instanceof Error ? error.message : 'Unknown error';
-        result.errors.push(`Department scrape failed: ${msg}`);
+        result.errors.push(`Department scrape failed: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
 
     console.log(`Completed ${department}: ${result.postsSaved} posts, ${result.commentsSaved} comments`);
@@ -182,29 +145,19 @@ export async function scrapeRedditForCourse(courseCode: string, maxPages: number
     console.log(`Scraping Reddit for course: ${courseCode}`);
 
     const result: ScrapeResult = {
-        query: courseCode,
-        postsScraped: 0,
-        postsNew: 0,
-        postsSaved: 0,
-        commentsSaved: 0,
-        coursesLinked: 0,
-        errors: [],
+        query: courseCode, postsScraped: 0, postsNew: 0,
+        postsSaved: 0, commentsSaved: 0, coursesLinked: 0, errors: []
     };
 
     try {
         const posts = await fetchPostsPaginated(`"${courseCode}"`, 100, maxPages);
         result.postsScraped = posts.length;
 
-        const qualityPosts = filterQualityPosts(posts);
-
-        for (const post of qualityPosts) {
+        for (const post of filterQualityPosts(posts)) {
             try {
                 const text = `${post.title} ${post.selftext}`;
                 const courseCodes = extractCourseCodes(text);
-
-                if (!courseCodes.includes(courseCode)) {
-                    courseCodes.push(courseCode);
-                }
+                if (!courseCodes.includes(courseCode)) courseCodes.push(courseCode);
 
                 const saveResult = await savePost(post, courseCodes);
                 result.postsSaved++;
@@ -213,113 +166,30 @@ export async function scrapeRedditForCourse(courseCode: string, maxPages: number
 
                 if (post.num_comments > 0) {
                     const comments = await fetchPostComments(post.id, 50);
-                    const commentsSaved = await saveComments(post.id, comments);
-                    result.commentsSaved += commentsSaved;
+                    result.commentsSaved += await saveComments(post.id, comments);
                     await sleep(500);
                 }
-
             } catch (error) {
-                const msg = error instanceof Error ? error.message : 'Unknown error';
-                result.errors.push(`Post ${post.id}: ${msg}`);
+                result.errors.push(`Post ${post.id}: ${error instanceof Error ? error.message : 'Unknown'}`);
             }
         }
-
     } catch (error) {
-        const msg = error instanceof Error ? error.message : 'Unknown error';
-        result.errors.push(`Course scrape failed: ${msg}`);
+        result.errors.push(`Course scrape failed: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
 
     return result;
 }
 
-/**
- * Scrape Reddit for courses using title-specific search
- * This searches specifically for course codes in POST TITLES to avoid irrelevant matches
- * (e.g., prevents "291" in schedule requests from matching CMPUT 291 discussions)
- */
-export async function scrapeRedditSearchedCourses(courseCodes: string[], maxPagesPerCourse: number = 2): Promise<ScrapeResult[]> {
-    console.log(`Scraping Reddit for ${courseCodes.length} courses with title-specific search`);
-
-    const results: ScrapeResult[] = [];
-
-    for (const courseCode of courseCodes) {
-        const result: ScrapeResult = {
-            query: courseCode,
-            postsScraped: 0,
-            postsNew: 0,
-            postsSaved: 0,
-            commentsSaved: 0,
-            coursesLinked: 0,
-            errors: [],
-        };
-
-        try {
-            const titleQuery = `title:"${courseCode}"`;
-            const posts = await fetchPostsPaginated(titleQuery, 100, maxPagesPerCourse);
-            result.postsScraped = posts.length;
-
-            console.log(`Found ${posts.length} posts with "${courseCode}" in title`);
-
-            const qualityPosts = filterQualityPosts(posts);
-
-            for (const post of qualityPosts) {
-                try {
-                    const text = `${post.title} ${post.selftext}`;
-                    const courseCodes = extractCourseCodes(text);
-
-                    // Ensure the searched course code is included
-                    if (!courseCodes.includes(courseCode)) {
-                        courseCodes.push(courseCode);
-                    }
-
-                    const saveResult = await savePost(post, courseCodes);
-                    result.postsSaved++;
-                    if (saveResult.isNew) result.postsNew++;
-                    result.coursesLinked += saveResult.coursesLinked;
-
-                    if (post.num_comments > 0) {
-                        const comments = await fetchPostComments(post.id, 50);
-                        const commentsSaved = await saveComments(post.id, comments);
-                        result.commentsSaved += commentsSaved;
-                        await sleep(500);
-                    }
-
-                } catch (error) {
-                    const msg = error instanceof Error ? error.message : 'Unknown error';
-                    result.errors.push(`Post ${post.id}: ${msg}`);
-                }
-            }
-
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : 'Unknown error';
-            result.errors.push(`Course scrape failed: ${msg}`);
-        }
-        results.push(result);
-    }
-
-    return results;
-}
-
-export async function getDiscussionsByCourseId(
-    courseId: string,
-    limit: number = 10,
-    offset: number = 0
-) {
-    // Two-step query for better index usage:
-    // 1. Get post IDs for this course
-    // 2. Fetch post details with ordering
+export async function getDiscussionsByCourseId(courseId: string, limit: number = 10, offset: number = 0) {
     const postIds = await db
         .select({ postId: redditPostCourses.postId })
         .from(redditPostCourses)
         .where(eq(redditPostCourses.courseId, courseId));
 
-    if (postIds.length === 0) {
-        return { discussions: [], hasMore: false };
-    }
+    if (postIds.length === 0) return { discussions: [], hasMore: false };
 
     const ids = postIds.map(p => p.postId);
 
-    // Fetch limit + 1 to check if there are more results
     const discussions = await db
         .select({
             id: redditPosts.id,

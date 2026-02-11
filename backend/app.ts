@@ -1,11 +1,8 @@
 import express from "express";
 import cors from "cors";
-import rmpRouter from "./routes/rmp-routes.js";
-import scraperRouter from "./routes/scraper-routes.js";
 import dbRouter from "./routes/db-routes.js";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
-
 
 const app = express();
 
@@ -35,15 +32,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100
 });
 app.use(limiter);
 
-app.use("/api/admin/rmp", rmpRouter);
-app.use("/api/admin/scraper", scraperRouter);
 app.use("/api", dbRouter);
 
 app.get("/", (req, res) => {

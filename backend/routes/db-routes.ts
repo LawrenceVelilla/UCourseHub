@@ -1,5 +1,7 @@
 import express from "express";
-import { getDepartmentProfessors } from "../scrapers/prof-catalogue.js";
+import { db } from "../config/db/index.js";
+import { professors } from "../config/db/professors.js";
+import { eq } from "drizzle-orm";
 import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller.js";
 import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller.js";
 
@@ -13,16 +15,16 @@ router.get("/", async (req, res) => {
     }
 
     try {
-        const professors = await getDepartmentProfessors(department);
-        res.json(professors);
+        const profs = await db.select().from(professors).where(eq(professors.department, department));
+        res.json(profs);
     } catch (error) {
         console.error("Error fetching professors:", error);
         res.status(500).json({ error: "Failed to fetch professors" });
     }
 });
 
-router.get("/course", async (req, res) => {
-    const courseCode = req.query.courseCode as string;
+router.get("/course/:courseCode", async (req, res) => {
+    const courseCode = req.params.courseCode as string;
 
     if (!courseCode) {
         return res.status(400).json({ error: "Course code parameter is required" });
@@ -37,8 +39,8 @@ router.get("/course", async (req, res) => {
     }
 });
 
-router.get("/dependents", async (req, res) => {
-    const courseCode = req.query.courseCode as string;
+router.get("/dependents/:courseCode", async (req, res) => {
+    const courseCode = req.params.courseCode as string;
 
     if (!courseCode) {
         return res.status(400).json({ error: "Course code parameter is required" });
@@ -53,18 +55,18 @@ router.get("/dependents", async (req, res) => {
     }
 });
 
-router.get("/reddit/discussions", fetchDiscussionsByCourseId);
+router.get("/reddit/discussions/:courseId", fetchDiscussionsByCourseId);
 
-router.get("/professors", async (req, res) => {
-    const courseId = req.query.courseId as string;
+router.get("/professors/:courseId", async (req, res) => {
+    const courseId = req.params.courseId as string;
 
     if (!courseId) {
         return res.status(400).json({ error: "courseId parameter is required" });
     }
 
     try {
-        const professors = await fetchProfessorsByCourseId(courseId);
-        res.json(professors);
+        const profs = await fetchProfessorsByCourseId(courseId);
+        res.json(profs);
     } catch (error) {
         console.error("Error fetching professors:", error);
         res.status(500).json({ error: "Failed to fetch professors" });

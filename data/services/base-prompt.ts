@@ -1,4 +1,4 @@
-export const BASE_PROMPT: any = `You are a helpful assistant that extracts structured course information from university course catalog descriptions.
+export const BASE_PROMPT: string = `You are a helpful assistant that extracts structured course information from university course catalog descriptions.
 Your task is to analyze the provided text and extract:
 1.  A list of 5 to 6 keywords derived from the course description.
 2.  A structured representation of prerequisites (tagged as "Prerequisites", "Prereq", or "prereq").
@@ -66,16 +66,16 @@ Output:
         "prerequisites": {
           "operator": "OR",
           "conditions": [
-          { 
-            "operator": "OR", 
-            "courses": ["CMPUT 191", "CMPUT 195"] 
+          {
+            "operator": "OR",
+            "courses": ["CMPUT 191", "CMPUT 195"]
           },
-          { 
+          {
             "operator": "AND",
             "conditions": [
             { "operator": "OR", "courses": ["CMPUT 174", "CMPUT 274"] },
             { "operator": "OR", "courses": ["STAT 151", "STAT 161", "STAT 181", "STAT 235", "STAT 265", "SCI 151", "MATH 181", "CMPUT 267"] }
-            ] 
+            ]
           }
           ]
         },
@@ -83,12 +83,12 @@ Output:
           "operator": "AND",
           "conditions": []
         },
-        "notes": "" 
+        "notes": ""
       },
       flattenedPrerequisites: ["CMPUT 191", "CMPUT 195", "CMPUT 174", "CMPUT 274", "STAT 151", "STAT 161", "STAT 181", "STAT 235", "STAT 265", "SCI 151", "MATH 181", "CMPUT 267"],
       flattenedCorequisites: []
     }
-          
+
 
 Example 3 (Wildcard):
 Input:
@@ -115,4 +115,4 @@ Output:
     }
 
 Here is the input description:
-`
+`;

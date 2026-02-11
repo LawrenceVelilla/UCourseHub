@@ -1,4 +1,4 @@
-import { db, query } from "../config/db/index.js";
+import { db } from "../config/db/index.js";
 import { courses } from "../config/db/courses.js";
 import { professors } from "../config/db/professors.js";
 import { professorCourses } from "../config/db/professor_courses.js";
@@ -6,9 +6,7 @@ import { eq, sql, desc } from "drizzle-orm";
 
 
 export async function fetchCourse(courseCode: string) {
-    // Use index for faster search
-    // We need to handle the case for triple codes like "INT D 200" where "INT D" is the department
-    // Use case-insensitive comparison with UPPER()
+    // Need to handle the case for triple codes like "INT D 200" where "INT D" is the department
     const normalizedCode = courseCode.toUpperCase().trim();
 
     const course = await db.select().from(courses).where(
