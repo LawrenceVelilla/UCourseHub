@@ -25,7 +25,7 @@ interface DiscussionsResponse {
 
 async function fetchCourse(courseCode: string): Promise<FinalCourseDetails | null> {
     const response = await fetch(
-        `${API_BASE_URL}/api/course?courseCode=${encodeURIComponent(courseCode)}`
+        `${API_BASE_URL}/api/course/${encodeURIComponent(courseCode)}`
     );
 
     if (!response.ok) {
@@ -38,7 +38,7 @@ async function fetchCourse(courseCode: string): Promise<FinalCourseDetails | nul
 
 async function fetchDependents(courseCode: string): Promise<DependentsResponse> {
     const response = await fetch(
-        `${API_BASE_URL}/api/dependents?courseCode=${encodeURIComponent(courseCode)}`
+        `${API_BASE_URL}/api/dependents/${encodeURIComponent(courseCode)}`
     );
 
     if (!response.ok) {
@@ -74,7 +74,7 @@ async function fetchRedditDiscussions(
     offset: number = 0
 ): Promise<DiscussionsResponse> {
     const response = await fetch(
-        `${API_BASE_URL}/api/reddit/discussions?courseId=${encodeURIComponent(courseId)}&limit=${limit}&offset=${offset}`
+        `${API_BASE_URL}/api/reddit/discussions/${encodeURIComponent(courseId)}?limit=${limit}&offset=${offset}`
     );
 
     if (!response.ok) {
@@ -101,7 +101,7 @@ export function useRedditDiscussions(courseId: string | null, limit: number = 10
 
 async function fetchProfessors(courseId: string): Promise<Professor[]> {
     const response = await fetch(
-        `${API_BASE_URL}/api/professors?courseId=${encodeURIComponent(courseId)}`
+        `${API_BASE_URL}/api/professors/${encodeURIComponent(courseId)}`
     );
 
     if (!response.ok) {
