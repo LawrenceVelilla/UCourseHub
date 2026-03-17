@@ -63,10 +63,10 @@ const Index = () => {
     const hasError = courseError || dependentsError;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="flex min-h-screen flex-col bg-background">
             <Header />
 
-            <main className="container py-8">
+            <main className="container flex-1 py-8">
                 <section className="mb-12 text-center">
                     <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
                         UCourseHub

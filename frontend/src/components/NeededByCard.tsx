@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { CourseDependent } from '@/hooks/use-course';
 import ScrollableCardContent from './ScrollableCardContent';
@@ -60,7 +60,6 @@ const NeededByCard = ({ prereqDependents, coreqDependents }: NeededByCardProps) 
         <Card className="card-needed-by shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
-                    <Users className="h-5 w-5 text-primary" />
                     Needed By
                 </CardTitle>
             </CardHeader>

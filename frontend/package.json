@@ -18,6 +18,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.90.19",
     "axios": "^1.13.2",
+    "better-auth": "^1.5.5",
     "body-parser": "^2.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
