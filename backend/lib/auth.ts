@@ -23,6 +23,9 @@ export const auth = betterAuth({
     basePath: "/api/auth",
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: allowedOrigins,
+    emailAndPassword: {
+        enabled: true,
+    },
     socialProviders: {
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID!,
