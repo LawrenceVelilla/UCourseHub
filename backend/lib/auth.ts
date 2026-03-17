@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,11 +13,12 @@ const allowedOrigins = [
     process.env.FRONTEND_URL4,
 ].filter(Boolean) as string[];
 
+const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+
 export const auth = betterAuth({
-    database: {
-        url: process.env.DATABASE_URL!,
-        type: "postgres",
-    },
+    database: pool,
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     basePath: "/api/auth",
     secret: process.env.BETTER_AUTH_SECRET,
