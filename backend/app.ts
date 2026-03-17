@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
+import { toNodeHandler } from "better-auth/node";
 import dbRouter from "./routes/db-routes.js";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
+import { auth } from "./lib/auth.js";
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
