@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
 import { db } from "../config/db/index.js";
 import { redditPosts, redditPostCourses } from "../config/db/reddit.js";
-import { eq, sql } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export async function fetchDiscussionsByCourseId(req: Request, res: Response) {
     const courseId = req.params.courseId as string;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const offset = parseInt(req.query.offset as string) || 0;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 50);
+    const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
 
-    if (!courseId) {
-        return res.status(400).json({ error: "courseId parameter is required" });
+    if (!courseId || courseId.length > 200) {
+        return res.status(400).json({ error: "Valid courseId parameter is required" });
     }
 
     try {
@@ -35,8 +35,8 @@ export async function fetchDiscussionsByCourseId(req: Request, res: Response) {
                 createdAt: redditPosts.createdUtc,
             })
             .from(redditPosts)
-            .where(sql`${redditPosts.id} IN ${ids}`)
-            .orderBy(sql`${redditPosts.score} DESC`)
+            .where(inArray(redditPosts.id, ids))
+            .orderBy(desc(redditPosts.score))
             .limit(limit + 1)
             .offset(offset);
 

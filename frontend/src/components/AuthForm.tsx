@@ -118,7 +118,7 @@ export default function AuthForm({ type, onToggle }: AuthFormProps) {
                     {isPending ? (
                         <Loader2 className="animate-spin" />
                     ) : isLogin ? (
-                        'Sign in'
+                        'Login'
                     ) : (
                         'Create account'
                     )}
@@ -132,7 +132,7 @@ export default function AuthForm({ type, onToggle }: AuthFormProps) {
                     onClick={onToggle}
                     className="font-medium text-primary hover:underline"
                 >
-                    {isLogin ? 'Sign up' : 'Sign in'}
+                    {isLogin ? 'Sign up' : 'Login'}
                 </button>
             </p>
         </div>

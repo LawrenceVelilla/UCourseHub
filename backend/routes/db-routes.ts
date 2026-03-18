@@ -10,8 +10,8 @@ const router = express.Router();
 router.get("/", async (req, res) => {
     const department = req.query.department as string;
 
-    if (!department) {
-        return res.status(400).json({ error: "Department parameter is required" });
+    if (!department || typeof department !== "string" || department.length > 50) {
+        return res.status(400).json({ error: "Valid department parameter is required" });
     }
 
     try {
@@ -26,8 +26,8 @@ router.get("/", async (req, res) => {
 router.get("/course/:courseCode", async (req, res) => {
     const courseCode = req.params.courseCode as string;
 
-    if (!courseCode) {
-        return res.status(400).json({ error: "Course code parameter is required" });
+    if (!courseCode || courseCode.length > 20) {
+        return res.status(400).json({ error: "Valid course code parameter is required" });
     }
 
     try {
@@ -42,8 +42,8 @@ router.get("/course/:courseCode", async (req, res) => {
 router.get("/dependents/:courseCode", async (req, res) => {
     const courseCode = req.params.courseCode as string;
 
-    if (!courseCode) {
-        return res.status(400).json({ error: "Course code parameter is required" });
+    if (!courseCode || courseCode.length > 20) {
+        return res.status(400).json({ error: "Valid course code parameter is required" });
     }
 
     try {
@@ -60,8 +60,8 @@ router.get("/reddit/discussions/:courseId", fetchDiscussionsByCourseId);
 router.get("/professors/:courseId", async (req, res) => {
     const courseId = req.params.courseId as string;
 
-    if (!courseId) {
-        return res.status(400).json({ error: "courseId parameter is required" });
+    if (!courseId || courseId.length > 200) {
+        return res.status(400).json({ error: "Valid courseId parameter is required" });
     }
 
     try {

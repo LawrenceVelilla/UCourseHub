@@ -1,17 +1,9 @@
 import { betterAuth } from "better-auth";
 import pg from "pg";
 import dotenv from "dotenv";
+import { allowedOrigins } from "../config/allowed-origins.js";
 
 dotenv.config();
-
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL1,
-    process.env.FRONTEND_URL2,
-    process.env.FRONTEND_URL3,
-    process.env.FRONTEND_URL4,
-].filter(Boolean) as string[];
 
 const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
