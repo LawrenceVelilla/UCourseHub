@@ -26,7 +26,7 @@ const Auth = () => {
                         <CardDescription>
                             {type === "signup"
                                 ? 'Sign up to save courses and plan your schedule'
-                                : 'Sign in to your UCourseHub account'
+                                : 'Login to your UCourseHub account'
                             }
                         </CardDescription>
                     </CardHeader>
