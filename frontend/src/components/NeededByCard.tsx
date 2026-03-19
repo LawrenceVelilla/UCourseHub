@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import type { CourseDependent } from '@/hooks/use-course';
+import type { CourseDependent } from '@/hooks/useCourse';
 import ScrollableCardContent from './ScrollableCardContent';
 
 interface NeededByCardProps {

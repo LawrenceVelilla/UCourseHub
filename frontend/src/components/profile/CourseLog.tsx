@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useUserCourses, useAddUserCourse, useDeleteUserCourse } from '@/hooks/use-user-courses';
+import { useUserCourses, useAddUserCourse, useDeleteUserCourse } from '@/hooks/useUserCourses';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Loader2, BookOpen } from 'lucide-react';
 

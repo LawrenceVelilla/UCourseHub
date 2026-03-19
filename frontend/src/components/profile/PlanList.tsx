@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { usePlans, useCreatePlan, useDeletePlan } from '@/hooks/use-plans';
+import { usePlans, useCreatePlan, useDeletePlan } from '@/hooks/usePlans';
 import { Calendar, Trash2, Plus, Loader2 } from 'lucide-react';
 import type { Plan } from '@/types/course';
 
 export default function PlanList() {
+    const navigate = useNavigate();
     const { data: plans, isLoading } = usePlans();
     const createPlan = useCreatePlan();
     const deletePlan = useDeletePlan();
@@ -68,7 +70,11 @@ export default function PlanList() {
             {plans && plans.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
                     {plans.map((plan: Plan) => (
-                        <Card key={plan.id} className="group relative">
+                        <Card
+                            key={plan.id}
+                            className="group relative cursor-pointer transition-shadow hover:shadow-earth-lg"
+                            onClick={() => navigate(`/planner?plan=${plan.id}`)}
+                        >
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-2">
@@ -79,7 +85,7 @@ export default function PlanList() {
                                         variant="ghost"
                                         size="sm"
                                         className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                                        onClick={() => deletePlan.mutate(plan.id)}
+                                        onClick={(e) => { e.stopPropagation(); deletePlan.mutate(plan.id); }}
                                     >
                                         <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                                     </Button>

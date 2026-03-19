@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, GitBranch, Link2 } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { RequirementCondition } from '@/types/course';
 import { transformToTree, type TreeNode } from '@/lib/requisite-tree';
@@ -77,8 +77,6 @@ const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
     const handleCourseClick = (courseCode: string) => {
         setSearchParams({ course: courseCode });
     };
-
-    const Icon = title === 'Prerequisites' ? GitBranch : Link2;
 
     // Transform the requirement condition to a tree structure
     const treeNodes = requisites ? transformToTree(requisites) : [];

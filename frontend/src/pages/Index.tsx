@@ -14,7 +14,7 @@ import {
     NeededByCardSkeleton,
     ProfessorCardSkeleton
 } from '@/components/skeletons';
-import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/use-course';
+import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/useCourse';
 import Footer from '@/components/layout/Footer';
 
 const Index = () => {
@@ -116,7 +116,7 @@ const Index = () => {
                             </div>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-3 overflow-hidden">
+                        <div className="grid gap-6 lg:grid-cols-3 overflow-hidden">
                             {isLoading ? (
                                 <>
                                     <RequisiteTreeSkeleton />
