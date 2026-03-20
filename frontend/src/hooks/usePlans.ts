@@ -47,6 +47,26 @@ export function useCreatePlan() {
     });
 }
 
+export function useUpdatePlan() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, name, courses }: { id: string; name?: string; courses?: { courseCode: string; year: number; term: string }[] }) => {
+            const res = await apiFetch(`${API_BASE_URL}/api/plans/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, courses }),
+            });
+            if (!res.ok) throw new Error('Failed to update plan');
+            return res.json();
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
+            queryClient.invalidateQueries({ queryKey: ['plan', variables.id] });
+        },
+    });
+}
+
 export function useDeletePlan() {
     const queryClient = useQueryClient();
 

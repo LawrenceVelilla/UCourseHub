@@ -109,7 +109,12 @@ export async function updatePlan(req: Request, res: Response) {
             await db.delete(planCourses).where(eq(planCourses.planId, planId));
 
             if (courses.length > 0) {
-                const rows = courses.map((c: { courseCode: string; year: number; term: string }) => ({
+                // Deduplicate by courseCode (last occurrence wins)
+                const deduped = new Map<string, { courseCode: string; year: number; term: string }>();
+                for (const c of courses) {
+                    deduped.set(c.courseCode, { courseCode: c.courseCode, year: c.year, term: c.term });
+                }
+                const rows = Array.from(deduped.values()).map(c => ({
                     planId,
                     courseCode: c.courseCode,
                     year: c.year,
