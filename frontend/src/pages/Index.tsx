@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import Header from '@/components/layout/Header';
+import PageLayout from '@/components/layout/PageLayout';
 import CourseSearch from '@/components/CourseSearch';
 import CourseCard from '@/components/CourseCard';
 import RequisiteTree from '@/components/RequisiteTree';
@@ -15,7 +15,6 @@ import {
     ProfessorCardSkeleton
 } from '@/components/skeletons';
 import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/useCourse';
-import Footer from '@/components/layout/Footer';
 
 const Index = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -63,10 +62,7 @@ const Index = () => {
     const hasError = courseError || dependentsError;
 
     return (
-        <div className="flex min-h-screen flex-col bg-background">
-            <Header />
-
-            <main className="container flex-1 py-8">
+        <PageLayout>
                 <section className="mb-12 text-center">
                     <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
                         UCourseHub
@@ -162,9 +158,7 @@ const Index = () => {
                         </div>
                     </div>
                 )}
-            </main>
-            <Footer />
-        </div>
+        </PageLayout>
     );
 };
 

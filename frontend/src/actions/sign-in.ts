@@ -17,10 +17,12 @@ export async function signInWithEmail(
     });
 }
 
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+
 export function signInWithGoogle() {
     signIn.social({
         provider: "google",
-        callbackURL: "/",
-        errorCallbackURL: "/auth",
+        callbackURL: FRONTEND_URL,
+        errorCallbackURL: `${FRONTEND_URL}/auth`,
     });
 }

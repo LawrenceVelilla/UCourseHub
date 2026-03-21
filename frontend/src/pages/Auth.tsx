@@ -3,8 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AuthForm from '@/components/AuthForm';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import PageLayout from '@/components/layout/PageLayout';
 
 const Auth = () => {
     const [type, setType] = useState<"login" | "signup">("login");
@@ -15,9 +14,8 @@ const Auth = () => {
     }
 
     return (
-        <div className="flex min-h-screen flex-col bg-background">
-            <Header />
-            <main className="container flex flex-1 items-center justify-center py-16">
+        <PageLayout>
+            <div className="flex flex-1 items-center justify-center py-8">
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
                         <CardTitle className="font-serif text-2xl">
@@ -37,9 +35,8 @@ const Auth = () => {
                         />
                     </CardContent>
                 </Card>
-            </main>
-            <Footer />
-        </div>
+            </div>
+        </PageLayout>
     );
 };
 
