@@ -4,6 +4,7 @@ import {
     closestCorners,
     DragOverlay,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     type DragStartEvent,
@@ -19,6 +20,7 @@ export default function PlannerDndProvider({ children }: { children: ReactNode }
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
     );
 
     const findContainer = useCallback(
