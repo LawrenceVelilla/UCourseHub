@@ -53,6 +53,33 @@ export interface PlannedCourse {
     semester: 'fall' | 'winter';
 }
 
+export interface Plan {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    courseCount: number;
+}
+
+export interface PlanDetail extends Omit<Plan, 'courseCount'> {
+    courses: PlanCourse[];
+}
+
+export interface PlanCourse {
+    courseCode: string;
+    year: number;
+    term: string;
+}
+
+export interface UserCourse {
+    id: string;
+    courseCode: string;
+    term: string;
+    year: number;
+    grade: string | null;
+    createdAt: string;
+}
+
 export interface GradeEntry {
     id: string;
     courseName: string;

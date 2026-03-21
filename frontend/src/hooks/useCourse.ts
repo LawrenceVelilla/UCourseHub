@@ -3,6 +3,10 @@ import type { FinalCourseDetails, RedditDiscussion, Professor } from '@/types/co
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+    return fetch(url, { credentials: "include", ...init });
+}
+
 export interface CourseDependent {
     id: string;
     courseCode: string;
@@ -24,7 +28,7 @@ interface DiscussionsResponse {
 }
 
 async function fetchCourse(courseCode: string): Promise<FinalCourseDetails | null> {
-    const response = await fetch(
+    const response = await apiFetch(
         `${API_BASE_URL}/api/course/${encodeURIComponent(courseCode)}`
     );
 
@@ -37,7 +41,7 @@ async function fetchCourse(courseCode: string): Promise<FinalCourseDetails | nul
 }
 
 async function fetchDependents(courseCode: string): Promise<DependentsResponse> {
-    const response = await fetch(
+    const response = await apiFetch(
         `${API_BASE_URL}/api/dependents/${encodeURIComponent(courseCode)}`
     );
 
@@ -73,7 +77,7 @@ async function fetchRedditDiscussions(
     limit: number = 10,
     offset: number = 0
 ): Promise<DiscussionsResponse> {
-    const response = await fetch(
+    const response = await apiFetch(
         `${API_BASE_URL}/api/reddit/discussions/${encodeURIComponent(courseId)}?limit=${limit}&offset=${offset}`
     );
 
@@ -100,7 +104,7 @@ export function useRedditDiscussions(courseId: string | null, limit: number = 10
 }
 
 async function fetchProfessors(courseId: string): Promise<Professor[]> {
-    const response = await fetch(
+    const response = await apiFetch(
         `${API_BASE_URL}/api/professors/${encodeURIComponent(courseId)}`
     );
 

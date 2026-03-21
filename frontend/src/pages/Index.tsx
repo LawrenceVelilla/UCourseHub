@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import Header from '@/components/layout/Header';
+import PageLayout from '@/components/layout/PageLayout';
 import CourseSearch from '@/components/CourseSearch';
 import CourseCard from '@/components/CourseCard';
 import RequisiteTree from '@/components/RequisiteTree';
@@ -14,8 +14,7 @@ import {
     NeededByCardSkeleton,
     ProfessorCardSkeleton
 } from '@/components/skeletons';
-import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/use-course';
-import Footer from '@/components/layout/Footer';
+import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/useCourse';
 
 const Index = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -63,10 +62,7 @@ const Index = () => {
     const hasError = courseError || dependentsError;
 
     return (
-        <div className="min-h-screen bg-background">
-            <Header />
-
-            <main className="container py-8">
+        <PageLayout>
                 <section className="mb-12 text-center">
                     <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl">
                         UCourseHub
@@ -116,7 +112,7 @@ const Index = () => {
                             </div>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-3 overflow-hidden">
+                        <div className="grid gap-6 lg:grid-cols-3 overflow-hidden">
                             {isLoading ? (
                                 <>
                                     <RequisiteTreeSkeleton />
@@ -162,9 +158,7 @@ const Index = () => {
                         </div>
                     </div>
                 )}
-            </main>
-            <Footer />
-        </div>
+        </PageLayout>
     );
 };
 

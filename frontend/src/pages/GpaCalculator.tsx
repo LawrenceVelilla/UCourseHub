@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Header from '@/components/layout/Header';
+import PageLayout from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -54,10 +54,7 @@ const GpaCalculator = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            <Header />
-
-            <main className="container py-8">
+        <PageLayout>
                 <section className="mb-8 text-center">
                     <h1 className="font-serif text-3xl font-bold text-foreground">
                         GPA Calculator
@@ -185,8 +182,7 @@ const GpaCalculator = () => {
                         </CardContent>
                     </Card>
                 </div>
-            </main>
-        </div>
+        </PageLayout>
     );
 };
 

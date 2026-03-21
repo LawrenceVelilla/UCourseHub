@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, GitBranch, Link2, Sparkles } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import type { RequirementCondition } from '@/types/course';
 import { transformToTree, type TreeNode } from '@/lib/requisite-tree';
@@ -58,7 +58,6 @@ const TreeNodeRenderer = ({ node, depth = 0, onCourseClick }: TreeNodeRendererPr
     if (node.type === 'wildcard') {
         return (
             <div className={`flex items-center gap-2 ${depth > 0 ? 'ml-4 border-l-2 border-border pl-4' : ''}`}>
-                <Sparkles className="h-3 w-3 text-amber-500" />
                 <Badge
                     variant="outline"
                     className="border-amber-500/30 bg-amber-500/5 font-mono text-amber-700 dark:text-amber-400"
@@ -79,8 +78,6 @@ const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
         setSearchParams({ course: courseCode });
     };
 
-    const Icon = title === 'Prerequisites' ? GitBranch : Link2;
-
     // Transform the requirement condition to a tree structure
     const treeNodes = requisites ? transformToTree(requisites) : [];
 
@@ -91,7 +88,6 @@ const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
         <Card className="card-requisite shadow-earth">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
-                    <Icon className="h-5 w-5 text-primary" />
                     {title}
                 </CardTitle>
             </CardHeader>
