@@ -9,15 +9,26 @@ import { auth } from "./lib/auth.js";
 import { allowedOrigins } from "./config/allowed-origins.js";
 
 const app = express();
-const limiter = rateLimit({
+
+// Behind Cloudflare/Render proxy — trust first proxy so req.ip is the real client IP
+app.set("trust proxy", 1);
+
+// Per-route rate limiters instead of one global limiter
+const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 150,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    handler: (_req, res) => res.status(429).json({ error: "Too many requests, please try again later." }),
 });
-app.use(limiter);
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 10,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    handler: (_req, res) => res.status(429).json({ error: "Too many attempts, please try again later." }),
 });
 
 app.use(cors({
@@ -38,9 +49,9 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.all("/api/auth/*splat", authLimiter, toNodeHandler(auth));
 
-app.use("/api", dbRouter);
-app.use("/api/plans", planRouter);
-app.use("/api/user/courses", userCourseRouter);
+app.use("/api", apiLimiter, dbRouter);
+app.use("/api/plans", apiLimiter, planRouter);
+app.use("/api/user/courses", apiLimiter, userCourseRouter);
 
 app.get("/", (req, res) => {
     res.json({ status: "ok", message: "UCourseHub API is running" });
