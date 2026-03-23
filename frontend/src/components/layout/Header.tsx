@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Search, Calculator, Calendar, LogOut, User, Settings } from 'lucide-react';
+import { Search, Calculator, Calendar, LogOut, User, Settings, Menu, X } from 'lucide-react';
 import { Logo } from '../ui/logo';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -10,15 +11,16 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+const navItems = [
+    { to: '/', label: 'Search', icon: Search },
+    { to: '/planner', label: 'Planner', icon: Calendar },
+    { to: '/gpa', label: 'GPA Calculator', icon: Calculator },
+];
+
 const Header = () => {
     const { user, isLoading, isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
-
-    const navItems = [
-        { to: '/', label: 'Search', icon: Search },
-        { to: '/planner', label: 'Planner', icon: Calendar },
-        { to: '/gpa', label: 'GPA Calculator', icon: Calculator },
-    ];
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const onSignOut = () => {
         logout(() => navigate('/'));
@@ -37,7 +39,8 @@ const Header = () => {
                 </NavLink>
 
                 <div className="flex items-center gap-4">
-                    <nav className="flex items-center gap-1">
+                    {/* Desktop nav */}
+                    <nav className="hidden items-center gap-1 sm:flex">
                         {navItems.map(({ to, label, icon: Icon }) => (
                             <NavLink
                                 key={to}
@@ -55,6 +58,7 @@ const Header = () => {
                         ))}
                     </nav>
 
+                    {/* Profile / Login */}
                     {isLoading ? (
                         <div className="h-8 w-20 animate-pulse rounded-lg bg-muted" />
                     ) : isAuthenticated ? (
@@ -103,8 +107,35 @@ const Header = () => {
                             Login
                         </NavLink>
                     )}
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:hidden"
+                    >
+                        {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </button>
                 </div>
             </div>
+
+            {mobileMenuOpen && (
+                <nav className="border-t border-border bg-background px-4 pb-3 pt-2 sm:hidden">
+                    {navItems.map(({ to, label, icon: Icon }) => (
+                        <NavLink
+                            key={to}
+                            to={to}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={({ isActive }) =>
+                                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${isActive
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                }`
+                            }
+                        >
+                            <Icon className="h-4 w-4" />
+                            {label}
+                        </NavLink>
+                    ))}
+                </nav>
+            )}
         </header>
     );
 };
