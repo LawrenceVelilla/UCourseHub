@@ -2,7 +2,7 @@ import express from "express";
 import { db } from "../config/db/index.js";
 import { professors } from "../config/db/professors.js";
 import { eq } from "drizzle-orm";
-import { fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller.js";
+import { fetchCourseList, fetchDependents, fetchCourse, fetchProfessorsByCourseId } from "../controllers/course-controller.js";
 import { fetchDiscussionsByCourseId } from "../controllers/reddit-controller.js";
 
 const router = express.Router();
@@ -20,6 +20,16 @@ router.get("/", async (req, res) => {
     } catch (error) {
         console.error("Error fetching professors:", error);
         res.status(500).json({ error: "Failed to fetch professors" });
+    }
+});
+
+router.get("/courses/list", async (_req, res) => {
+    try {
+        const courseList = await fetchCourseList();
+        res.json(courseList);
+    } catch (error) {
+        console.error("Error fetching course list:", error);
+        res.status(500).json({ error: "Failed to fetch course list" });
     }
 });
 

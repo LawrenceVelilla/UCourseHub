@@ -5,6 +5,14 @@ import { professorCourses } from "../config/db/professor_courses.js";
 import { eq, sql, desc } from "drizzle-orm";
 
 
+export async function fetchCourseList() {
+    const result = await db
+        .select({ courseCode: courses.courseCode, title: courses.title })
+        .from(courses)
+        .orderBy(courses.courseCode);
+    return result;
+}
+
 export async function fetchCourse(courseCode: string) {
     // Need to handle the case for triple codes like "INT D 200" where "INT D" is the department
     const normalizedCode = courseCode.toUpperCase().trim();
