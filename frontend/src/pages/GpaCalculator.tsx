@@ -7,16 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { GRADE_POINTS } from '@/types/course';
 import { Plus, Trash2, Calculator, Trophy } from 'lucide-react';
 
+type Mode = 'semester' | 'cumulative';
+
+const createEntry = () => ({
+    id: Date.now().toString() + Math.random(),
+    courseName: '',
+    credits: 3,
+    grade: '',
+});
+
 const GpaCalculator = () => {
-    const [entries, setEntries] = useState<any[]>([
-        { id: '1', courseName: '', credits: 3, grade: '' },
-    ]);
+    const [mode, setMode] = useState<Mode>('semester');
+    const [entries, setEntries] = useState(() =>
+        Array.from({ length: 5 }, createEntry)
+    );
+
+    // Cumulative mode state
+    const [priorGpa, setPriorGpa] = useState('');
+    const [priorCredits, setPriorCredits] = useState('');
 
     const addEntry = () => {
-        setEntries([
-            ...entries,
-            { id: Date.now().toString(), courseName: '', credits: 3, grade: '' },
-        ]);
+        setEntries([...entries, createEntry()]);
     };
 
     const removeEntry = (id: string) => {
@@ -25,7 +36,7 @@ const GpaCalculator = () => {
         }
     };
 
-    const updateEntry = (id: string, field: keyof any, value: string | number) => {
+    const updateEntry = (id: string, field: string, value: string | number) => {
         setEntries(
             entries.map((e) => (e.id === id ? { ...e, [field]: value } : e))
         );
@@ -35,13 +46,23 @@ const GpaCalculator = () => {
         const validEntries = entries.filter((e) => e.grade && e.credits > 0);
         if (validEntries.length === 0) return null;
 
-        const totalPoints = validEntries.reduce(
+        const semesterPoints = validEntries.reduce(
             (sum, e) => sum + GRADE_POINTS[e.grade] * e.credits,
             0
         );
-        const totalCredits = validEntries.reduce((sum, e) => sum + e.credits, 0);
+        const semesterCredits = validEntries.reduce((sum, e) => sum + e.credits, 0);
 
-        return (totalPoints / totalCredits).toFixed(2);
+        if (mode === 'cumulative' && priorGpa && priorCredits) {
+            const pGpa = parseFloat(priorGpa);
+            const pCredits = parseFloat(priorCredits);
+            if (pGpa >= 0 && pCredits > 0) {
+                const totalPoints = semesterPoints + pGpa * pCredits;
+                const totalCredits = semesterCredits + pCredits;
+                return (totalPoints / totalCredits).toFixed(2);
+            }
+        }
+
+        return (semesterPoints / semesterCredits).toFixed(2);
     };
 
     const gpa = calculateGPA();
@@ -60,17 +81,75 @@ const GpaCalculator = () => {
                         GPA Calculator
                     </h1>
                     <p className="mt-2 text-muted-foreground">
-                        Calculate your cumulative GPA based on the University of Alberta 4.0 scale
+                        Calculate your GPA based on the University of Alberta 4.0 scale
                     </p>
                 </section>
 
                 <div className="mx-auto max-w-2xl space-y-6">
+                    {/* Mode toggle */}
+                    <div className="flex justify-center gap-2">
+                        <Button
+                            variant={mode === 'semester' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setMode('semester')}
+                        >
+                            Semester GPA
+                        </Button>
+                        <Button
+                            variant={mode === 'cumulative' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setMode('cumulative')}
+                        >
+                            Cumulative GPA
+                        </Button>
+                    </div>
+
+                    {/* Prior GPA input for cumulative mode */}
+                    {mode === 'cumulative' && (
+                        <Card className="shadow-earth border-primary/20">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="font-serif text-lg">
+                                    Prior Academic Record
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1">
+                                        <label className="mb-1 block text-sm text-muted-foreground">Current GPA</label>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            max={4}
+                                            step={0.01}
+                                            placeholder="e.g. 3.50"
+                                            value={priorGpa}
+                                            onChange={(e) => setPriorGpa(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="mb-1 block text-sm text-muted-foreground">Total Credits</label>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            placeholder="e.g. 60"
+                                            value={priorCredits}
+                                            onChange={(e) => setPriorCredits(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    Enter your existing GPA and total credits, then add this semester's courses below.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Grade Entries */}
                     <Card className="shadow-earth">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 font-serif text-lg">
                                 <Calculator className="h-5 w-5 text-primary" />
-                                Course Grades
+                                {mode === 'cumulative' ? 'This Semester' : 'Course Grades'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -143,7 +222,7 @@ const GpaCalculator = () => {
                                     <div className="mb-2 flex items-center justify-center gap-2">
                                         <Trophy className={`h-6 w-6 ${getGpaColor(parseFloat(gpa))}`} />
                                         <span className="text-sm uppercase tracking-wider text-muted-foreground">
-                                            Your GPA
+                                            {mode === 'cumulative' && priorGpa && priorCredits ? 'Cumulative GPA' : 'Your GPA'}
                                         </span>
                                     </div>
                                     <p className={`font-serif text-6xl font-bold ${getGpaColor(parseFloat(gpa))}`}>

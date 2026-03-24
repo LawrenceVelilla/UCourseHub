@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, X } from "lucide-react";
+import { X } from "lucide-react";
 import type { PlannerCourse } from "@/stores/planner-store";
 
 interface CourseCardProps {
@@ -38,7 +38,6 @@ export default function CourseCard({ course, onRemove, compact }: CourseCardProp
                         : "border-border bg-card"
                 }`}
             >
-                <GripVertical className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <span className="font-semibold text-foreground">{course.code}</span>
                 {course.credits != null && (
                     <span className="text-muted-foreground">({course.credits})</span>
@@ -58,19 +57,14 @@ export default function CourseCard({ course, onRemove, compact }: CourseCardProp
         <div
             ref={setNodeRef}
             style={style}
-            className={`group flex items-center gap-2 rounded-lg border px-3 py-2.5 transition-shadow ${
+            {...attributes}
+            {...listeners}
+            className={`group flex cursor-grab items-center gap-2 rounded-lg border px-3 py-2.5 transition-shadow ${
                 isDragging
                     ? "border-primary bg-[var(--cream)] shadow-earth-lg"
                     : "border-border bg-card"
             }`}
         >
-            <div
-                {...attributes}
-                {...listeners}
-                className="shrink-0 cursor-grab text-muted-foreground hover:opacity-80"
-            >
-                <GripVertical className="h-4 w-4" />
-            </div>
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">{course.code}</p>
                 <p className="truncate text-xs text-muted-foreground">{course.title}</p>
