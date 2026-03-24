@@ -3,7 +3,7 @@ import {
     DndContext,
     closestCorners,
     DragOverlay,
-    PointerSensor,
+    MouseSensor,
     TouchSensor,
     useSensor,
     useSensors,
@@ -19,7 +19,7 @@ export default function PlannerDndProvider({ children }: { children: ReactNode }
     const [activeDrag, setActiveDrag] = useState<PlannerCourse | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
     );
 
