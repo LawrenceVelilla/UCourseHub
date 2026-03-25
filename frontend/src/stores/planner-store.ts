@@ -17,7 +17,7 @@ export type Placements = Record<string, PlannerCourse[]>;
 
 const SEMESTERS = ["Fall", "Winter"];
 const DEFAULT_YEARS = [1, 2, 3, 4];
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 // ---------- Helpers ----------
 

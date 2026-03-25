@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UserCourse } from '@/types/course';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 function apiFetch(url: string, init?: RequestInit): Promise<Response> {
     return fetch(url, { credentials: "include", ...init });
