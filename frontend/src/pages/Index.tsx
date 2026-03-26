@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import PageLayout from '@/components/layout/PageLayout';
 import CourseSearch from '@/components/CourseSearch';
@@ -17,8 +17,9 @@ import {
 import { useCourse, useDependents, useRedditDiscussions, useProfessors } from '@/hooks/useCourse';
 
 const Index = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const courseCode = searchParams.get('course');
+    const { courseCode: rawCourseCode } = useParams<{ courseCode: string }>();
+    const navigate = useNavigate();
+    const courseCode = rawCourseCode ? decodeURIComponent(rawCourseCode).toUpperCase() : null;
 
     const { data: course, isLoading: isCourseLoading, error: courseError } = useCourse(courseCode);
 
@@ -52,9 +53,9 @@ const Index = () => {
     const handleSearch = (query: string) => {
         const normalizedQuery = query.toUpperCase().trim();
         if (normalizedQuery) {
-            setSearchParams({ course: normalizedQuery });
+            navigate(`/course/${encodeURIComponent(normalizedQuery)}`);
         } else {
-            setSearchParams({});
+            navigate('/');
         }
     };
 

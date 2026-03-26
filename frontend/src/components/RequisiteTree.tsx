@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { RequirementCondition } from '@/types/course';
 import { transformToTree, type TreeNode } from '@/lib/requisite-tree';
 import ScrollableCardContent from './ScrollableCardContent';
@@ -72,10 +72,10 @@ const TreeNodeRenderer = ({ node, depth = 0, onCourseClick }: TreeNodeRendererPr
 };
 
 const RequisiteTree = ({ requisites, title }: RequisiteTreeProps) => {
-    const [, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const handleCourseClick = (courseCode: string) => {
-        setSearchParams({ course: courseCode });
+        navigate(`/course/${encodeURIComponent(courseCode)}`);
     };
 
     // Transform the requirement condition to a tree structure

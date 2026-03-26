@@ -13,13 +13,22 @@ export const onRequest: PagesFunction = async (context) => {
         body: context.request.method !== "GET" && context.request.method !== "HEAD"
             ? context.request.body
             : undefined,
+        redirect: "manual",
     });
 
     const responseHeaders = new Headers(response.headers);
-    // Remove hop-by-hop headers
     responseHeaders.delete("connection");
     responseHeaders.delete("keep-alive");
     responseHeaders.delete("transfer-encoding");
+
+    // Rewrite redirect locations from backend URL to frontend URL
+    const location = responseHeaders.get("location");
+    if (location) {
+        responseHeaders.set(
+            "location",
+            location.replace(BACKEND_URL, url.origin),
+        );
+    }
 
     return new Response(response.body, {
         status: response.status,

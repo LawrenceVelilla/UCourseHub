@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { CourseDependent } from '@/hooks/useCourse';
 import ScrollableCardContent from './ScrollableCardContent';
 
@@ -48,10 +48,10 @@ const DependentList = ({ title, dependents, onCourseClick, variant }: DependentL
 };
 
 const NeededByCard = ({ prereqDependents, coreqDependents }: NeededByCardProps) => {
-    const [, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const handleCourseClick = (courseCode: string) => {
-        setSearchParams({ course: courseCode });
+        navigate(`/course/${encodeURIComponent(courseCode)}`);
     };
 
     const hasAnyDependents = prereqDependents.length > 0 || coreqDependents.length > 0;
