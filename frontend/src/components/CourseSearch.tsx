@@ -29,7 +29,7 @@ const CourseSearch = ({ onSearch, placeholder = "Search courses (e.g., CMPUT 200
         if (allCourses.length > 0 || isLoadingCourses) return;
         setIsLoadingCourses(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/api/courses/list`, { credentials: "include" });
+            const res = await fetch(`${API_BASE_URL}/api/v1/courses`, { credentials: "include" });
             if (!res.ok) return;
             const data: CourseSuggestion[] = await res.json();
             setAllCourses(data);

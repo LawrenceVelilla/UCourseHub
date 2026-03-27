@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { toNodeHandler } from "better-auth/node";
-import dbRouter from "./routes/db-routes.js";
+import courseRouter from "./routes/course-routes.js";
 import planRouter from "./routes/plan-routes.js";
 import userCourseRouter from "./routes/user-course-routes.js";
 import rateLimit from "express-rate-limit";
@@ -31,6 +32,8 @@ const authLimiter = rateLimit({
     handler: (_req, res) => res.status(429).json({ error: "Too many attempts, please try again later." }),
 });
 
+app.use(helmet());
+
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
@@ -49,9 +52,9 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.all("/api/auth/*splat", authLimiter, toNodeHandler(auth));
 
-app.use("/api", apiLimiter, dbRouter);
-app.use("/api/plans", apiLimiter, planRouter);
-app.use("/api/user/courses", apiLimiter, userCourseRouter);
+app.use("/api/v1/courses", apiLimiter, courseRouter);
+app.use("/api/v1/plans", apiLimiter, planRouter);
+app.use("/api/v1/user/courses", apiLimiter, userCourseRouter);
 
 app.get("/", (req, res) => {
     res.json({ status: "ok", message: "UCourseHub API is running" });

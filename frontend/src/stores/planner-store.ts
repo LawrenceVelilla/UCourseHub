@@ -36,7 +36,7 @@ async function fetchCourseDetails(
 ): Promise<FinalCourseDetails | null> {
     try {
         const res = await fetch(
-            `${API_BASE_URL}/api/course/${encodeURIComponent(courseCode)}`,
+            `${API_BASE_URL}/api/v1/courses/${encodeURIComponent(courseCode)}`,
             { credentials: "include" },
         );
         if (!res.ok) return null;

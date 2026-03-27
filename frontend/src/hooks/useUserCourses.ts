@@ -11,7 +11,7 @@ export function useUserCourses() {
     return useQuery({
         queryKey: ['userCourses'],
         queryFn: async (): Promise<UserCourse[]> => {
-            const res = await apiFetch(`${API_BASE_URL}/api/user/courses`);
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/user/courses`);
             if (!res.ok) throw new Error('Failed to fetch courses');
             return res.json();
         },
@@ -23,7 +23,7 @@ export function useAddUserCourse() {
 
     return useMutation({
         mutationFn: async (data: { courseCode: string; term: string; year: number; grade?: string }) => {
-            const res = await apiFetch(`${API_BASE_URL}/api/user/courses`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/user/courses`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -40,11 +40,10 @@ export function useDeleteUserCourse() {
 
     return useMutation({
         mutationFn: async (courseCode: string) => {
-            const res = await apiFetch(`${API_BASE_URL}/api/user/courses/${encodeURIComponent(courseCode)}`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/user/courses/${encodeURIComponent(courseCode)}`, {
                 method: 'DELETE',
             });
             if (!res.ok) throw new Error('Failed to delete course');
-            return res.json();
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['userCourses'] }),
     });

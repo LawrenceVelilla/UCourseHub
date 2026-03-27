@@ -11,7 +11,7 @@ export function usePlans() {
     return useQuery({
         queryKey: ['plans'],
         queryFn: async (): Promise<Plan[]> => {
-            const res = await apiFetch(`${API_BASE_URL}/api/plans`);
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/plans`);
             if (!res.ok) throw new Error('Failed to fetch plans');
             return res.json();
         },
@@ -22,7 +22,7 @@ export function usePlan(planId: string | null) {
     return useQuery({
         queryKey: ['plan', planId],
         queryFn: async (): Promise<PlanDetail> => {
-            const res = await apiFetch(`${API_BASE_URL}/api/plans/${planId}`);
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/plans/${planId}`);
             if (!res.ok) throw new Error('Failed to fetch plan');
             return res.json();
         },
@@ -35,7 +35,7 @@ export function useCreatePlan() {
 
     return useMutation({
         mutationFn: async (name: string) => {
-            const res = await apiFetch(`${API_BASE_URL}/api/plans`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/plans`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name }),
@@ -52,7 +52,7 @@ export function useUpdatePlan() {
 
     return useMutation({
         mutationFn: async ({ id, name, courses }: { id: string; name?: string; courses?: { courseCode: string; year: number; term: string }[] }) => {
-            const res = await apiFetch(`${API_BASE_URL}/api/plans/${id}`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/plans/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, courses }),
@@ -72,11 +72,10 @@ export function useDeletePlan() {
 
     return useMutation({
         mutationFn: async (planId: string) => {
-            const res = await apiFetch(`${API_BASE_URL}/api/plans/${planId}`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/v1/plans/${planId}`, {
                 method: 'DELETE',
             });
             if (!res.ok) throw new Error('Failed to delete plan');
-            return res.json();
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['plans'] }),
     });

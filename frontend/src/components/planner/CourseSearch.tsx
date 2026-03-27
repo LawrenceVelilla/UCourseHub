@@ -23,7 +23,7 @@ export default function CourseSearch({ onAddCourse }: CourseSearchProps) {
 
         try {
             const res = await fetch(
-                `${API_BASE_URL}/api/course/${encodeURIComponent(trimmed)}`,
+                `${API_BASE_URL}/api/v1/courses/${encodeURIComponent(trimmed)}`,
                 { credentials: "include" },
             );
             if (!res.ok) throw new Error("Not found");

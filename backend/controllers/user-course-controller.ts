@@ -78,7 +78,7 @@ export async function deleteUserCourse(req: Request, res: Response) {
 
         if (result.length === 0) return res.status(404).json({ error: "Course not found" });
 
-        res.json({ success: true });
+        res.status(204).send();
     } catch (error) {
         console.error("Error deleting user course:", error);
         res.status(500).json({ error: "Failed to delete course" });

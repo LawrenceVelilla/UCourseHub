@@ -87,6 +87,27 @@ export async function updatePlan(req: Request, res: Response) {
     const planId = req.params.id as string;
     const { name, courses } = req.body;
 
+    if (name !== undefined && (typeof name !== "string" || name.length === 0 || name.length > 100)) {
+        return res.status(400).json({ error: "Valid plan name is required (1-100 chars)" });
+    }
+
+    if (courses !== undefined) {
+        if (!Array.isArray(courses)) {
+            return res.status(400).json({ error: "Courses must be an array" });
+        }
+        for (const c of courses) {
+            if (!c.courseCode || typeof c.courseCode !== "string" || c.courseCode.length > 20) {
+                return res.status(400).json({ error: "Each course must have a valid courseCode" });
+            }
+            if (typeof c.year !== "number" || c.year < 2000 || c.year > 2100) {
+                return res.status(400).json({ error: "Each course must have a valid year (2000-2100)" });
+            }
+            if (!c.term || typeof c.term !== "string") {
+                return res.status(400).json({ error: "Each course must have a valid term" });
+            }
+        }
+    }
+
     try {
         // Verify ownership
         const [plan] = await db
@@ -97,7 +118,7 @@ export async function updatePlan(req: Request, res: Response) {
         if (!plan) return res.status(404).json({ error: "Plan not found" });
 
         // Update name if provided
-        if (name && typeof name === "string" && name.length <= 100) {
+        if (name) {
             await db
                 .update(plans)
                 .set({ name: name.trim(), updatedAt: new Date() })
@@ -109,7 +130,6 @@ export async function updatePlan(req: Request, res: Response) {
             await db.delete(planCourses).where(eq(planCourses.planId, planId));
 
             if (courses.length > 0) {
-                // Deduplicate by courseCode (last occurrence wins)
                 const deduped = new Map<string, { courseCode: string; year: number; term: string }>();
                 for (const c of courses) {
                     deduped.set(c.courseCode, { courseCode: c.courseCode, year: c.year, term: c.term });
@@ -129,7 +149,14 @@ export async function updatePlan(req: Request, res: Response) {
                 .where(eq(plans.id, planId));
         }
 
-        res.json({ success: true });
+        // Return updated plan
+        const courses_result = await db
+            .select({ courseCode: planCourses.courseCode, year: planCourses.year, term: planCourses.term })
+            .from(planCourses)
+            .where(eq(planCourses.planId, planId));
+
+        const [updated] = await db.select().from(plans).where(eq(plans.id, planId));
+        res.json({ ...updated, courses: courses_result });
     } catch (error) {
         console.error("Error updating plan:", error);
         res.status(500).json({ error: "Failed to update plan" });
@@ -150,7 +177,7 @@ export async function deletePlan(req: Request, res: Response) {
 
         if (result.length === 0) return res.status(404).json({ error: "Plan not found" });
 
-        res.json({ success: true });
+        res.status(204).send();
     } catch (error) {
         console.error("Error deleting plan:", error);
         res.status(500).json({ error: "Failed to delete plan" });

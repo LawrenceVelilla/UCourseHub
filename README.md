@@ -4,10 +4,23 @@ A web application for searching University of Alberta courses with integrated pr
 
 ## Features
 
-- Course search with detailed information
+- Course search with autocomplete
 - Professor ratings from RateMyProfessor
 - Reddit discussions for courses
 - Course prerequisites, corequisites, and dependents
+- Degree planner with drag-and-drop
+- GPA calculator
+- Google OAuth authentication
+
+## Architecture
+
+```
+frontend/          → React SPA on Cloudflare Pages
+backend/           → Express API on Render
+data/              → Offline scrapers & CLI tool
+```
+
+The frontend and API are separate deployments. Cloudflare proxies `/api/*` requests to the backend via a Pages Function.
 
 ## Installation
 
@@ -29,6 +42,13 @@ cd frontend
 npm install
 ```
 
+### Data Pipeline (CLI)
+
+```bash
+cd data
+npm install
+```
+
 ## Setup
 
 1. Copy the example environment file:
@@ -41,9 +61,16 @@ cp backend/.env.example backend/.env
 PORT=3000
 NODE_ENV=development
 DATABASE_URL=postgresql://user:password@host/database
-OPENAI_API_KEY=your_key
 FRONTEND_URL1=http://localhost:5173
 FRONTEND_URL2=your_deployed_frontend_url
+```
+
+3. For the data pipeline, configure `data/.env`:
+```
+DATABASE_URL=postgresql://user:password@host/database
+OPENAI_API_KEY=your_key
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
 ```
 
 ## Running the Application
@@ -62,40 +89,65 @@ npm run dev
 
 The backend server runs on port 3000 and the frontend on port 5173.
 
+### Data Pipeline
+```bash
+cd data
+node cli/index.js
+```
+
+Interactive CLI with options to scrape courses, professors, and Reddit discussions.
+
 ## API Routes
 
-### Public Routes
+All API routes are versioned under `/api/v1`.
 
-#### Course Data (Fetching logic)
-- `GET /api/course?courseCode=<courseCode>` - Get course details
-- `GET /api/dependents?courseCode=<courseCode>` - Get course dependents
-- `GET /api/?department=<department>` - Get department professors
-- `GET /api/professors?courseId=<courseId>` - Get professors for a course
-- `GET /api/reddit/discussions?courseId=<courseId>` - Get Reddit discussions for a course
+### Courses
 
-### Admin Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/courses` | List all courses (code + title) |
+| GET | `/api/v1/courses/:courseCode` | Get course details |
+| GET | `/api/v1/courses/:courseCode/dependents` | Get courses that require this course |
+| GET | `/api/v1/courses/:id/professors` | Get professors for a course |
+| GET | `/api/v1/courses/:id/discussions` | Get Reddit discussions for a course |
 
-#### RateMyProfessor (To be moved to a different folder when I start working on the recommendation systme since this is mostly offline and doesnt need to be handled by the backend server)
-- `GET /api/admin/rmp/` - Health check
-- `POST /api/admin/rmp/` - Fetch professors from RateMyProfessor
+### Plans (authenticated)
 
-#### Scrapers (To be moved to a different folder when I start working on the recommendation systme since this is mostly offline and doesnt need to be handled by the backend server)
-- `GET /api/admin/scraper/prof-scraper?department=<department>` - Scrape professors from the Professor catalogue
-- `GET /api/admin/scraper/course-scraper?department=<department>&from=<from>&to=<to>` - Scrape courses
-- `GET /api/admin/scraper/reddit-scraper?courseCode=<courseCode>&limit=<limit>` - Scrape Reddit posts
-- `POST /api/admin/scraper/professor-sync?department=<department>` - Sync professors to courses (Use this when you already have the Professor Data and just want to sync it to the courses)
-- `POST /api/admin/scraper/professor-full-sync?department=<department>&schoolId=<schoolId>&rmpDepartmentId=<rmpDepartmentId>` - Full professor sync (Full cycle -> Scrape&Sync)
-- `POST /api/admin/scraper/reddit/department?department=<department>` - Scrape Reddit for department
-- `POST /api/admin/scraper/reddit/course?courseCode=<courseCode>&maxPages=<maxPages>` - Scrape Reddit for specific course
-- `POST /api/admin/scraper/reddit/courses/title-search` - Scrape Reddit for multiple courses (body: courseCodes array)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/plans` | List user's plans |
+| GET | `/api/v1/plans/:id` | Get plan details |
+| POST | `/api/v1/plans` | Create a plan |
+| PUT | `/api/v1/plans/:id` | Update a plan |
+| DELETE | `/api/v1/plans/:id` | Delete a plan |
 
-## Future plans
+### User Courses (authenticated)
 
-- Add suggestions/recommendations for courses based on the course searched
-    - Say we are searching CMPUT 291, we could add a section that says "If you found this course hard, you might also find these courses hard: ... "
-    - Make sure to keep context (e.g. both CMPUT 291 and NURS 223 are hard, but wont recommend each other since they are in different departments and they are not prereqs/coreqs of each other)
-- Although we have the caching provided by TanstackQuery, we should add a Redis cache to the backend to reduce database load and improve concurrent user support.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/user/courses` | List user's completed courses |
+| POST | `/api/v1/user/courses` | Add a completed course |
+| DELETE | `/api/v1/user/courses/:courseCode` | Remove a completed course |
 
+### Auth
 
+Authentication is handled by [Better Auth](https://www.better-auth.com/) at `/api/auth/*`.
 
-### If you have any cool ideas you think would be cool to add, feel free to make a pull request or let me know and lets collaborate!
+## Data Pipeline
+
+Scraping and data processing is handled offline via an interactive CLI tool (`data/cli/index.js`), not through the API. The pipeline collects data from three sources:
+
+- **UAlberta Course Catalogue** — Cheerio-based scraper with GPT-4o-mini for prerequisite parsing
+- **Rate My Professors** — Reverse-engineered GraphQL API
+- **Reddit r/uAlberta** — OAuth2 API with rate limiting and exponential backoff
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, TanStack Query, Tailwind CSS, Cloudflare Pages
+- **Backend**: Express, TypeScript, Drizzle ORM, PostgreSQL, Helmet, Render
+- **Data**: Cheerio, Selenium, OpenAI, Zod
+- **Auth**: Better Auth with Google OAuth
+
+## Contributing
+
+If you have any cool ideas you think would be cool to add, feel free to make a pull request or let me know and lets collaborate!
