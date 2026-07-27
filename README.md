@@ -2,6 +2,8 @@
 
 A web application for searching University of Alberta courses with integrated professor ratings from RateMyProfessor and Reddit discussions for added context.
 
+https://ucoursehub.com/
+
 ## Features
 
 - Course search with autocomplete
