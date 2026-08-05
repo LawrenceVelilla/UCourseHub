@@ -4,6 +4,23 @@ import { professors } from "../config/db/professors.js";
 import { professorCourses } from "../config/db/professor_courses.js";
 import { eq, sql, desc } from "drizzle-orm";
 
+// Approximate 0-indexed start month of each UAlberta term, used to decide term recency.
+const TERM_START_MONTH: Record<string, number> = {
+    Winter: 0, // January
+    Spring: 4, // May
+    Summer: 6, // July
+    Fall: 8,   // September
+};
+
+// A teaching term is shown if it's in the future or started within the last 12 months.
+// Older terms are hidden (not deleted) so stale instructors drop off automatically.
+function isRecentTerm(term: string, year: number): boolean {
+    const termDate = new Date(year, TERM_START_MONTH[term] ?? 0, 1);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    return termDate >= oneYearAgo;
+}
+
 
 export async function fetchCourseList() {
     const result = await db
@@ -84,17 +101,48 @@ export async function fetchProfessorsByCourseId(courseId: string) {
         .where(eq(professorCourses.courseId, courseId))
         .orderBy(desc(professorCourses.year), desc(professorCourses.term));
 
-    return results.map(prof => ({
-        id: prof.id,
-        name: prof.name,
-        department: prof.department,
-        rmpLink: prof.rmpId ? `https://www.ratemyprofessors.com/professor/${prof.rmpId}` : null,
-        rating: prof.rating ? parseFloat(prof.rating) : null,
-        difficulty: prof.difficulty ? parseFloat(prof.difficulty) : null,
-        wouldTakeAgain: prof.wouldTakeAgain,
-        numRatings: prof.numRatings,
-        semester: `${prof.term} ${prof.year}`,
-        term: prof.term,
-        year: prof.year,
-    }));
+    // A professor may teach the same course across multiple terms, which yields
+    // one join row per (term, year). Collapse to a single entry per professor,
+    // keeping the most recent term (results are ordered year desc, term desc) and
+    // listing every semester they've taught it.
+    const byProfessor = new Map<string, {
+        id: string;
+        name: string;
+        department: string;
+        rmpLink: string | null;
+        rating: number | null;
+        difficulty: number | null;
+        wouldTakeAgain: number | null;
+        numRatings: number | null;
+        semester: string;
+        semesters: string[];
+        term: string;
+        year: number;
+    }>();
+
+    for (const prof of results) {
+        if (!isRecentTerm(prof.term, prof.year)) continue; // hide terms older than a year
+        const semester = `${prof.term} ${prof.year}`;
+        const existing = byProfessor.get(prof.id);
+        if (existing) {
+            existing.semesters.push(semester);
+            continue;
+        }
+        byProfessor.set(prof.id, {
+            id: prof.id,
+            name: prof.name,
+            department: prof.department,
+            rmpLink: prof.rmpId ? `https://www.ratemyprofessors.com/professor/${prof.rmpId}` : null,
+            rating: prof.rating ? parseFloat(prof.rating) : null,
+            difficulty: prof.difficulty ? parseFloat(prof.difficulty) : null,
+            wouldTakeAgain: prof.wouldTakeAgain,
+            numRatings: prof.numRatings,
+            semester, // most recent
+            semesters: [semester], // all terms taught, most recent first
+            term: prof.term,
+            year: prof.year,
+        });
+    }
+
+    return Array.from(byProfessor.values());
 }

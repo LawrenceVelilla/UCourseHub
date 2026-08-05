@@ -51,6 +51,17 @@ export function normalizeDepartment(ualbertaDept: string): string {
     return DEPARTMENT_MAPPING[ualbertaDept] || ualbertaDept;
 }
 
+export function getDepartmentAliases(department: string): string[] {
+    const aliases = new Set([department]);
+    for (const [ualberta, rmp] of Object.entries(DEPARTMENT_MAPPING)) {
+        if (rmp === department || ualberta === department) {
+            aliases.add(ualberta);
+            aliases.add(rmp);
+        }
+    }
+    return [...aliases];
+}
+
 export function normalizeName(name: string): string {
     return name.toLowerCase().replace(/^(dr\.?|prof\.?|professor)\s*/i, '')
         .replace(/,?\s*(ph\.?d\.?|phd|m\.?sc?\.?|m\.?a\.?|b\.?sc?\.?)$/i, '')

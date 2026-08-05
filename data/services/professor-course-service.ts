@@ -95,25 +95,42 @@ export async function linkProfessorToCourses(professorId: string, scrapedCourses
 }
 
 export async function createProfessorWithoutRMP(name: string, department: string): Promise<string> {
+    // Normalize whitespace so rescrapes match existing rows instead of inserting near-duplicates
+    // (e.g. "David Rast III " vs "David Rast III"). Matches the normalization used on save.
+    const cleanName = name.replace(/\s+/g, ' ').trim();
+
     const existing = await db
         .select({ id: professors.id })
         .from(professors)
-        .where(and(eq(professors.department, department), sql`lower(${professors.name}) = ${name.toLowerCase()}`))
+        .where(and(
+            eq(professors.department, department),
+            sql`regexp_replace(btrim(lower(${professors.name})), '\s+', ' ', 'g') = ${cleanName.toLowerCase()}`
+        ))
         .limit(1);
 
     if (existing.length > 0) return existing[0].id;
 
-    const id = uuidv4();
-    await db.insert(professors).values({
-        id, name, department,
-        rmp_id: null,
-        avg_rating: null,
-        difficulty: null,
-        would_take_again: null,
-        num_ratings: 0,
-    });
+    // Upsert as a final guard against races / exact-name conflicts on the
+    // (name, department) unique index. onConflictDoUpdate (not DoNothing) so
+    // RETURNING always yields the row id, whether inserted or already present.
+    const [row] = await db.insert(professors)
+        .values({
+            id: uuidv4(),
+            name: cleanName,
+            department,
+            rmp_id: null,
+            avg_rating: null,
+            difficulty: null,
+            would_take_again: null,
+            num_ratings: 0,
+        })
+        .onConflictDoUpdate({
+            target: [professors.name, professors.department],
+            set: { updatedAt: new Date() },
+        })
+        .returning({ id: professors.id });
 
-    return id;
+    return row.id;
 }
 
 export async function processProfessor(scrapedProf: ScrapedProfessor, department: string): Promise<{ matchResult: MatchResult; linkResult: LinkResult }> {
